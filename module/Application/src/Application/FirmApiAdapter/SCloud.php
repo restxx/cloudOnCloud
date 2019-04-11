@@ -64,7 +64,7 @@ class SCloud extends FirmAbstract
         );
 
         $cxContext = stream_context_create($opts);
-        $result    = @file_get_contents($url, false, $cxContext);
+        $result    = file_get_contents($url, false, $cxContext);
         if (isset($http_response_header) && !preg_match('/200/', $http_response_header[0])) {
             $this->clearTokenCache();
             throw new \Exception('接口请求异常');
@@ -248,16 +248,15 @@ class SCloud extends FirmAbstract
             'total'      => sprintf('%.2f', $overseasCloudServerFee),
             'price'      => '',
         ];
-
         $datas[] = $overseasCloudServerFeeTemp;
-
-        //cdn带宽费用明细，史文俊  win调试屏蔽
- //       $cdnReport = $this->cdnReport($cdate, $products, $public_group);
+        //cdn带宽费用明细，史文俊
+        $cdnReport = $this->cdnReport($cdate, $products, $public_group);
 
         //星云带宽，暂时移到单独模块去统计了
         //$netReport = $this->netReport($cdate, $products, $public_group);
+        //星云带宽 卢万达
 
-        //星云费用 卢万达
+        //星云费用 董光华
         $scloudNetReport = $this->scloudNetReport($cdate, $products, $public_group);
 
         //物理机机柜数据明细 可以统一问吕李俊
@@ -265,12 +264,11 @@ class SCloud extends FirmAbstract
 
         //综合服务数据数据明细，同物理机机柜 可以统一问吕李俊
         $zhfwcbReport = $this->zhfwcbReport($cdate, $products, $public_group);
-        
-        //私有云综合服务成本，同星云费用
-        $vmzhfwcbReport = $this->vmzhfwcbReport($cdate, $products, $public_group);
-        $datas = array_merge($datas, $scloudNetReport, $vmzhfwcbReport, $jgReport, $zhfwcbReport);
 
-//        $datas = array_merge($datas, $cdnReport, $scloudNetReport, $jgReport, $zhfwcbReport);
+       //私有云综合服务成本，同星云费用
+        $vmzhfwcbReport = $this->vmzhfwcbReport($cdate, $products, $public_group);
+ 		
+        $datas = array_merge($datas, $cdnReport, $scloudNetReport, $vmzhfwcbReport, $jgReport, $zhfwcbReport);
 
         //计算总价
         $sum = [

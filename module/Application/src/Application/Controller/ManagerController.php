@@ -662,7 +662,6 @@ class ManagerController extends AbstractActionController
 
             try {
                 $reports = $firm->getFinancialReport($products, $public_group, $overseasCloudServerFee);
-
             } catch (\Exception $e) {
 
                 return new JsonModel(['code' => $e->getCode(), 'msg' => $e->getMessage()]);
@@ -711,7 +710,6 @@ class ManagerController extends AbstractActionController
             $table = $this->getTable("scloudm_bandwidth");
 
             $data = $table->getFilter($this->ui()->getData());
-
             return new JsonModel(
                 [
                     "sEcho" => intval($this->getRequest()->getPost("sEcho")),

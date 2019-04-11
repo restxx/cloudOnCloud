@@ -76,10 +76,9 @@ trait Financail
 
         $api = "/cdn_api/get_price";
 
-        $host = "http://222.73.155.145:5000";
+        $host = "http://newapicloudcdn.ztgame.com.cn:5000";
 
         $url = $host . $api . '/' . date("Y-m", strtotime("-1 month"));
-
         $result = json_decode($this->get($url), true);
 
         $mapping = $this->mapping;
@@ -169,7 +168,6 @@ trait Financail
             $lines = $this->format_excel2array($targetFile);
         }
         $mapping = $this->mapping;
-
         foreach ($lines as $line) {
             $temp = [];
             if ($line['A'] == "项目" || !$line['A']) {
@@ -216,9 +214,7 @@ trait Financail
         $filename = "maximo_project_info.txt";
         $filePath =
             PHP_OS == "WINNT" ? "data/" . $filename : "/tmp/" . $filename;
-
-        $targetFile = getcwd()."/data/report/maximo_project_info." . date("Y.m", strtotime("-1 month")) . ".txt";
-
+        $targetFile = "data/report/maximo_project_info." . date("Y.m", strtotime("-1 month")) . ".txt";
         if (!is_file($targetFile)) {
             copy($filePath, $targetFile);
             $lines = file($filePath);
@@ -310,8 +306,7 @@ trait Financail
         $filePath =
             PHP_OS == "WINNT" ? "data/" . $filename : "/tmp/" . $filename;
 
-        $targetFile = getcwd()."/data/report/maximo_project_info." . date("Y.m", strtotime("-1 month")) . ".txt";
-
+        $targetFile = "data/report/maximo_project_info." . date("Y.m", strtotime("-1 month")) . ".txt";
         if (!is_file($targetFile)) {
             copy($filePath, $targetFile);
             $lines = file($filePath);
@@ -404,8 +399,7 @@ trait Financail
         $filePath =
             PHP_OS == "WINNT" ? "data/" . $filename : "/tmp/" . $filename;
 
-        $targetFile = getcwd()."/data/report/cloud_bill_info." . date("Y.m", strtotime("-2 month")) . ".log";
-
+        $targetFile = "data/report/cloud_bill_info." . date("Y.m", strtotime("-1 month")) . ".log";
         if (!is_file($targetFile)) {
             if (!is_file($filePath)) {
                 throw new \Exception('获取星云物理机数据失败', -2);
@@ -443,8 +437,10 @@ trait Financail
 
             preg_match('/:(\d+)/', $total, $match);
 
+		//修改星云计费比例
+
             if ($match) {
-                $temp['total'] = sprintf('%.2f', $match[1]);
+                $temp['total'] = sprintf('%.2f', $match[1]*0.9);
             }
 
             //获取分成项目公共信息
@@ -610,4 +606,4 @@ trait Financail
         return $datas;
     }
 
-}
+} 

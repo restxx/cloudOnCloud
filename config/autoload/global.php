@@ -124,8 +124,8 @@ $config = array(
         ],
     ],
     'view_manager' => array(
-        'display_not_found_reason' => false,
-        'display_exceptions'       => false
+        'display_not_found_reason' => true,
+        'display_exceptions'       => true
     ),
     'firm_hosts' => require 'FirmHostConfig.php',
     'os_types'   => require 'OSTypeConfig.php',
