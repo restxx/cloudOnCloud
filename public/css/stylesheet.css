@@ -1,0 +1,582 @@
+html{
+    min-width: 1000px;
+}
+body {
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    font-family: "Hiragino Sans GB", "Tahoma", "microsoft yahei", "simsun";
+}
+h1,h2,ul,li,h3,h4,p{
+    margin: 0;
+    padding: 0;
+}
+input{
+    font-weight: normal;
+    font-size: 12px;
+}
+.dataTables_scrollHeadInner{
+    width: 100%!important;
+}
+.dataTables_scrollHeadInner table{
+    width: 100%!important;
+}
+.dataTables_scrollFootInner{
+    width: 100%!important;
+}
+.dataTables_scrollFootInner table{
+    width: 100%!important;
+}
+.manager-top {
+    width: 100%;
+    height: 48px;
+    background-color: #2F3847;
+}
+
+.manager-top .logo {
+    float: left;
+    height: 100%;
+    background-image: url('../towcloud/images/new/logo-3.png');
+    width: 122px;
+    background-size: 100%;
+    margin-left: 15px;
+}
+
+.manager-top .logo a {
+    display: block;
+    height: 100%;
+    width: 100%;
+}
+
+.manager-top .nav-menu {
+    position: relative;
+    height: 100%;
+    margin-left: 200px;
+    color: #f5f5f5;
+    font-size: 14px;
+    /*background-color: red;*/
+}
+
+.manager-top .nav-menu ul {
+    display: block;
+    height: 100%;
+    line-height: 48px;
+    padding: 0;
+    margin: 0;
+}
+
+.nav-menu-left, .nav-menu-right {
+    float: left;
+    height: 100%;
+    width: 50%;
+}
+
+.manager-top .nav-menu .nav-menu-left ul li {
+    display: block;
+    float: left;
+    margin-right: 30px;
+    cursor: pointer;
+    min-width: 60px;
+    text-align: center;
+}
+
+.manager-top .nav-menu .nav-menu-right ul li {
+    display: block;
+    float: right;
+    margin-right: 30px;
+    cursor: pointer;
+    min-width: 60px;
+    text-align: center;
+}
+
+.manager-top .nav-menu li:hover {
+    background-color: #000000;
+    color: #ffb800;
+}
+
+.manage-container {
+    position: absolute;
+    top: 48px;
+    left:0;
+    right: 0;
+    bottom: 0;
+    min-width: 1000px;
+}
+.manage-container .left dl a{
+    text-decoration: none;
+    color: #586376;
+    font-weight: 700;
+}
+.manage-container .left{
+    position: relative;
+    width: 199px;
+    height: 100%;
+    border-right: solid 1px #cedfea;
+    background-color: #f0f6f6;
+}
+
+.manage-container .left h2{
+    font-size: 22px;
+    font-weight: 400;
+    display: block;
+    padding: 0 20px;
+    color: #171f2a;
+    height: 62px;
+    line-height: 62px;
+    margin: 0;
+}
+
+.manage-container .left .line{
+    width: 156px;
+    height: 0;
+    margin: 0 auto 15px;
+    border: none;
+    border-top: 1px solid #cadbe6;
+    border-bottom: 1px solid #f8fbfb;
+}
+
+.manage-container .left dl{
+    padding: 0;
+    margin: 0;
+    font-size: 14px;
+    line-height: 35px;
+    overflow: auto;
+    position: absolute;
+    width: 100%;
+    top: 75px;
+    bottom: 0;
+    padding-top: 15px;
+
+}
+.manage-container .left dd{
+    margin: 0;
+    cursor: pointer;
+    line-height: 35px;
+}
+.manage-container .left dd a{
+    display: block;
+    height: 100%;
+    width: 100%;
+}
+.manage-container .left dd a:hover
+{
+    background-color: #d5e2ef;
+    color: #0070cc;
+}
+.left-selected{
+    background-color: #d5e2ef;
+    color: #0070cc;
+}
+.manage-container .left dd span{
+    margin-left: 35px;
+}
+.close-left{
+    line-height: 33px;
+    position: absolute;
+    top: 21px;
+    right: -1px;
+    overflow: hidden;
+    width: 16px;
+    height: 36px;
+    border: 1px solid #c7e0ef;
+    border-right: none;
+    border-radius: 3px 0 0 3px;
+    z-index: 100;
+    background-color: #F7FDFD;
+
+}
+.close-left:hover,.open-left:hover{
+    text-decoration: none;
+}
+.open-left{
+    right: -17px;
+    border: 1px solid #c7e0ef;
+    border-left: none;
+    border-radius: 0 3px 3px 0;
+}
+
+.manage-container .right{
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 200px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+.manage-container .manage-area{
+    height: 100%;
+}
+.manage-container .manage-area .manage-area-nav{
+    height: 62px;
+    width: 100%;
+    padding-left: 20px;
+    padding-right: 20px;
+    line-height: 62px;
+}
+.manage-container .manage-area .manage-area-nav .unbind{
+    float: right;
+}
+.manage-container .manage-area .manage-area-nav h2
+{
+    display: inline-block;
+    vertical-align: middle;
+    font-size: 22px;
+    font-weight: 400;
+    margin-right: 20px;
+
+}
+.manage-container .manage-area .manage-area-nav .list {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 30px;
+
+}
+.manage-container .manage-area .manage-area-nav .list .list-state{
+    display: inline-block;
+    line-height: 30px;
+    background-color: white;
+}
+.drop-list {
+    position: absolute;
+    display: block;
+    border: solid 1px #cedfea;
+    line-height: 1;
+    margin-top: 0;
+    margin-left: -1px;
+    z-index: 200;
+    background-color: white;
+    max-height: 400px;
+    overflow: auto;
+}
+.drop-list li{
+    display: block;
+    padding: 10px;
+
+}
+.drop-list li:not(.list-item-selected):hover{
+    background-color: #F2F2F2;
+}
+.list-item-selected {
+    background-color: #0071CE;
+    color: white;
+}
+
+.manage-container #hosts a{
+    color: #0071ce;
+    font-weight: 200;
+}
+
+input[type=search]{
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    width: 200px;
+    height: 30px;
+}
+.manage-container #hosts td{
+    text-align: center;
+}
+.manage-container th{
+    text-align: center;
+}
+.manage-container #hosts a:hover{
+    text-decoration: underline;
+}
+
+.manage-container #hosts th, .manage-container #hosts td { white-space: nowrap; }
+.manage-container #hosts div.dataTables_wrapper {
+    width: 800px;
+    margin: 0 auto;
+}
+.DTFC_RightWrapper {
+    right:0!important;
+}
+.DTFC_RightBodyLiner{
+    overflow: visible!important;
+}
+.DTFC_RightBodyWrapper{
+    overflow: visible!important;
+}
+.dataTable-container .toolbar{
+    float:left;
+}
+ul.drop-menu{
+    display: block;
+    border: solid 1px #D1D2D3;
+    position: absolute;
+    width: 100px;
+    text-align: right;
+    right: 0;
+    background-color: white;
+    z-index: 10000;
+}
+ul.drop-menu li{
+    display: block;
+    padding: 5px;
+    padding-right: 15px;
+    padding-left: 15px;
+    font-size: 12px;
+}
+ul.drop-menu li.disabled a{
+    color:#A2A2A2;
+}
+ul.drop-menu li.disabled a:hover{
+    text-decoration: none;
+}
+ul.drop-menu li:hover{
+    background-color: #f2f2f2;
+}
+.operation {
+    display: inline-block;
+    height: 20px;
+}
+.menu-hide{
+    display: none!important;
+}
+div.dropdown{
+    display: inline-block;
+}
+.manage-page-intro {
+    background-color: #F2F7FB;
+}
+.manage-page-intro h1{
+    display: inline-block;
+    margin-left: 60px;
+    margin-top: 30px;
+    font-size: 22px;
+}
+.manage-page-intro p {
+    display: block;
+    margin-left: 60px;
+    margin-right: 60px;
+    padding-bottom: 30px;
+    color: #555;
+}
+
+.server-bind-from {
+    margin: auto;
+    margin-top: 50px;
+    width: 400px;
+}
+
+.text-center{
+    text-align: center;
+}
+
+.text-left{
+    text-align: left;
+}
+.dataTables_processing{
+    z-index:1000;
+    color: #4EF7B0!important;
+}
+
+.manage-area-detail-nav{
+    height: 62px;
+    line-height: 62px;
+    margin: 0 20px;
+    position: relative;
+    border-bottom: 1px solid #ccc;
+
+}
+.manage-area-detail-nav .left-nav{
+    font-size: 16px;
+}
+.manage-area-detail-nav .left-nav-id{
+    font-size: 20px;
+}
+
+.line-icon {
+    display: inline-block;
+    margin-left: 10px;
+    margin-right: 10px;
+    font-size: 20px;
+    color: #a2a2a2;
+}
+.detail-tab{
+    position: absolute;
+    bottom: 0;
+    top: 64px;
+    left: 30px;
+    right: 30px;
+}
+.detail-tab .tab-list{
+    display: block;
+    height: 44px;
+    margin: 0 30px;
+    line-height: 44px;
+}
+.detail-tab .tab-list li{
+    display: inline-block;
+    text-align: center;
+}
+
+.detail-tab .tab-list li a:hover{
+    color: #0070cc!important;
+}
+
+.detail-tab .tab-list li:not(.tab-title-cur) a:hover:before {
+    width: 100%;
+}
+
+.detail-tab .tab-list li a:before{
+    content: "";
+    position: absolute;
+    bottom: 0;
+    width: 0;
+    left: 0;
+    border-bottom: solid 2px;
+    -webkit-transition: width .2s ease-in-out;
+    transition: width .2s ease-in-out;
+}
+
+.detail-tab .tab-list li a{
+    display: block;
+    position: relative;
+    padding: 5px 40px;
+    margin: auto;
+    height: 45px;
+    font-size: 1.4rem;
+    color: #000000;
+    text-decoration: none;
+    -webkit-transition: color .2s ease-in-out;
+    transition: color .2s ease-in-out;
+}
+.detail-tab .tab-page{
+    top: 44px;
+    bottom: 0;
+    left: 0;
+    right: 30px;
+    display: none;
+    border-top: 1px solid #cccccc;
+    overflow: auto;
+}
+.tab-title-cur a{
+    color: #0070cc!important;
+    padding: 0 20px 3px;
+    border-bottom: solid 2px;
+}
+.tab-content-cur{
+    display: block!important;
+}
+.detail-tab .tab-page .info-box{
+    width: 100%;
+    height: auto;
+    margin: 20px 0;
+}
+
+.detail-tab .tab-page .info-box ul
+{
+    display: table;
+    height: auto;
+}
+.detail-tab .tab-page .info-box ul li
+{
+    display: table-row;
+    height: 35px;
+}
+.detail-tab .tab-page .info-box ul li span
+{
+    display: table-cell;
+    padding-right: 20px;
+}
+.detail-tab .tab-page .info-box .info-body{
+    margin-left: 20px;
+    margin-top: 15px;
+}
+.detail-tab .tab-page .info-box ul li .info-name{
+    color: #777777;
+}
+.panel-container{
+    margin: 0 10px;
+}
+/*.panel-container .panel{
+    float:left;
+}*/
+.panel-container .panel p{
+    line-height: 35px;
+}
+.modal{
+    margin-top: 100px;
+}
+.modal-body{
+    max-height: 500px;
+    overflow-y: auto;
+}
+.js-server-manager tr td:first-child{
+    width: 200px;
+    min-width: 150px;
+}
+.js-server-manager tr td:last-child{
+    word-break: break-all;
+}
+#js-bind-hosts td{
+    text-align: center;
+}
+table td{
+    text-align: center;
+}
+table th{
+    text-align: center;
+}
+.DTFC_Cloned td{
+    text-align: center;
+}
+.menu-text span:last-child{
+    display: inline-block;
+    max-width: 60px;
+}
+.menu-container
+{
+    text-align: left;
+    padding-left: 15px;
+}
+#addToJSModal .modal-content,#addToJSModal .modal-dialog,
+{
+    width: 800px;
+}
+#addInstance .modal-content,#addInstance .modal-dialog{
+    width: 1000px;
+    height: 850px;
+}
+#addInstance .modal-dialog{
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+#addInstance .modal-body{
+    max-height: 700px;
+}
+#addToJSModal .modal-content input{
+    width: 80px;
+    margin: auto;
+}
+
+#orderManager .modal-content,#orderManager .modal-dialog,#contactsManager .modal-content,#contactsManager .modal-dialog{
+    width: 1000px;
+}
+.tab-content{
+    padding-top: 15px;
+}
+.order .badge{
+    background-color: red;
+    font-size: 12px;
+}
+#contacts_list{
+    width: 100%!important;
+}
+
+table.dataTable td,table.dataTable th{
+    text-align: center;
+}
+#orders_list{
+    width: 100%!important;
+}
+.cor-content{
+    margin: auto;
+    margin-left: 40px;
+    margin-right: 40px;
+}
+.red{
+    color: red;
+}

@@ -1,0 +1,34 @@
+{
+    "name": "zendframework\/skeleton-application",
+    "description": "Skeleton Application for ZF2",
+    "license": "BSD-3-Clause",
+    "keywords": [
+        "framework",
+        "zf2"
+    ],
+    "homepage": "http:\/\/framework.zend.com\/",
+    "require": {
+        "php": ">=5.5",
+        "zendframework\/zendframework": "2.4.*",
+        "zendframework\/zftool": "dev-master",
+        "phpoffice\/phpexcel": "^1.8"
+    },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https:\/\/packagist.phpcomposer.com"
+        },
+        {
+            "packagist": false
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Application\\": "module\/Application\/src\/Application",
+            "Account\\": "module\/Account\/src\/Account"
+        }
+    },
+    "config": {
+        "autoloader-suffix": "Mztgame"
+    }
+}

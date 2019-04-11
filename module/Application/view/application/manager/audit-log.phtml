@@ -1,0 +1,134 @@
+<link rel="stylesheet" type="text/css" media="all" href="/css/jquery.dataTables.min.css"/>
+<link rel="stylesheet" type="text/css" media="all" href="/css/jquery.datatable.extend.css"/>
+<div>
+    <div class="box col-md-12">
+        <div class="box-inner">
+            <div class="box-header well" data-original-title="">
+                <h2><i class="glyphicon glyphicon-user"></i> 审计日志</h2>
+            </div>
+            <div class="box-content">
+                <div class="alert alert-info"></div>
+                <div class="panel panel-default">
+                    <div class="panel-heading" id="headingOne">
+                        <h4 class="panel-title">
+                            <a class="collapsed" data-toggle="collapse" data-parent="#accordion"
+                               href="#collapseOne">
+                                <span class="glyphicon glyphicon-search"></span> 过滤选项
+                                <span class="pull-right glyphicon glyphicon-chevron-down arrow"></span>
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="collapseOne" class="panel-collapse collapse">
+                        <div class="box-content">
+                            <div class="form-group">
+                                <ul class="list-inline">
+                                    <li>
+                                        <input type="text" class="form-control column_filter" placeholder="过滤IP"
+                                               data-column="0">
+                                    </li>
+                                    <li>
+                                        <div class="dropdown">
+                                            <button class="btn btn-default dropdown-toggle" type="button"
+                                                    id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true"
+                                                    aria-expanded="true">
+                                                日志类型
+                                                <span class="caret"></span>
+                                            </button>
+                                            <ul class="dropdown-menu" aria-labelledby="typeMenu" data-column="1">
+                                                <li><a href="javascript:void(0);" data-value="">全部日志</a></li>
+                                                <li><a href="javascript:void(0);" data-value="1">登陆日志</a></li>
+                                                <li><a href="javascript:void(0);" data-value="2">操作日志</a></li>
+                                            </ul>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <input type="text" readonly
+                                               style="width: 220px;height: 27px;background-color: #ffffff;border-radius: 3px;"
+                                               name="reservation" id="reservation" data-column="3" value="选择日期段"
+                                               class="form-control"/>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <table class="table table-striped table-hover" style="width: 100%;"
+                       id="auditLogTable">
+                    <thead>
+                    <tr>
+                        <th>IP</th>
+                        <th>类型</th>
+                        <th>操作时间</th>
+                        <th>日志</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        $('.detail-tab .tab-list li').click(function () {
+            $('.detail-tab .tab-list li').removeClass('tab-title-cur');
+            var me = $(this);
+            me.addClass('tab-title-cur');
+            $('.detail-tab .tab-page').removeClass('tab-content-cur');
+            var index = me.index();
+            if (me.hasClass('operation-log')) {
+                initLogTable('<?=$this->id?>');
+            }
+            $('.detail-tab .tab-page:eq(' + index + ')').addClass('tab-content-cur');
+        });
+
+        var consumedArray = {
+            1: {desc: "登陆日志", css: "label-warning"},
+            2: {desc: "操作日志", css: "label-success"}
+        };
+
+        var options = {
+            sAjaxSource: "<?=$this->url("audit-log")?>",
+            aoColumns: [
+                {sWidth: '8%', data: 'host_ip'},
+                {sWidth: '10%', data: 'type', bSortable: false,
+                    render: function (data, type, row) {
+                        var template = consumedArray[row.type];
+                        return '<span class="label ' + template.css + '">' + template.desc + '</span>';
+                    }
+                },
+                {sWidth: '10%', data: 'create_at'},
+                {
+                    sWidth: '40%',
+                    data: 'log',
+                    sClass: "text-left",
+                    bSortable: false
+                }
+            ],
+            aoColumnDefs: [
+                {
+                    sDefaultContent: '',
+                    aTargets: [ '_all' ]
+                }
+            ]
+        };
+
+        Ui.table.init($("#auditLogTable"), options);
+
+        $(".panel-title").on("click", function () {
+            $(this).find(".arrow").toggleClass("glyphicon-chevron-down");
+            $(this).find(".arrow").toggleClass("glyphicon-chevron-up");
+        });
+
+        $('#reservation').daterangepicker({
+            locale: {
+                format: 'YYYY-MM-DD'
+            }
+        }, function (start, end) {
+            var target = $('#reservation');
+            Ui.table.instance[$("#auditLogTable").selector].fnFilter("{\"begin\": \"" + moment(start.toISOString()).format('YYYY-MM-DD') + "\",\"end\":\"" + moment(end.toISOString()).format('YYYY-MM-DD') + "\"}", target.attr('data-column'));
+        });
+    });
+</script>

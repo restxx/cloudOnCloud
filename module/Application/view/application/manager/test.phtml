@@ -1,0 +1,291 @@
+<div class="manage-area-nav">
+    <h2>腾讯云</h2>
+    <div class="list project"></div>
+    <div class="list region"></div>
+</div>
+<div class="toolbar-template" style="display: none;">
+    <button class="btn btn-default new-instance-create" onclick="alert('敬请期待')">创建</button>
+    <button class="btn btn-forbidden btn-default instance-restart" disabled>重新启动</button>
+    <div class="dropdown">
+        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown"
+                aria-haspopup="true" aria-expanded="true">
+            更多操作
+            <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+            <li class="disabled"><a href="#">开机</a></li>
+            <li class="disabled"><a href="#">关机</a></li>
+            <li class="disabled"><a href="#">加载密钥</a></li>
+            <li class="disabled"><a href="#">分配至项目</a></li>
+            <li class="disabled"><a href="#">改名</a></li>
+            <li class="disabled"><a href="#">调整网络</a></li>
+            <li class="disabled"><a href="#">销毁</a></li>
+            <li class="disabled"><a href="#">导出选中</a></li>
+            <li><a href="#">导出全部</a></li>
+        </ul>
+    </div>
+</div>
+<div class="dataTable-container" style="width: 90%; margin: auto;">
+    <table id="hosts" class="display" cellspacing="0" width="100%">
+        <thead>
+        <tr>
+            <th>
+                <input type="checkbox" class="tablecheck checkall"/>
+            </th>
+            <th>ID/主机名</th>
+            <th>IP</th>
+            <th>状态</th>
+            <th>到期时间</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tfoot>
+        <tr>
+            <th>
+                <input type="checkbox" class="tablecheck checkall"/>
+            </th>
+            <th>ID/主机名</th>
+            <th>IP</th>
+            <th>状态</th>
+            <th>到期时间</th>
+            <th>操作</th>
+        </tr>
+        </tfoot>
+    </table>
+</div>
+<script>
+$(function () {
+    var menus = [
+        {
+            name: '开机',
+            func: function (menu) {
+                alert(menu.attr('data-value'));
+            }
+        },
+        {
+            name: '关机',
+            func: function (menu) {
+                alert(menu.attr('data-value'));
+            }
+        },
+        {
+            name: '重新启动',
+            func: function (menu) {
+                alert(menu.attr('data-value'));
+            }
+        },
+        {
+            name: '修改密码',
+            func: function (menu) {
+                alert(menu.attr('data-value'));
+            }
+        },
+        {
+            name: '详细信息',
+            func: function (menu) {
+                alert(menu.attr('data-value'));
+            }
+        }
+    ];
+
+    $('.project').DropDownList(
+        {
+            1: '全部',
+            2: '默认项目',
+            3: '球球大作战',
+            4: '嘟嘟'
+        },
+        function (id, name) {
+            alert(name);
+        }
+    );
+    $('.region').DropDownList(
+        {
+            1: '华北地区(北京)',
+            2: '华南地区(广州)',
+            3: '华东地区(上海)',
+            4: '东南亚地区(香港)',
+            5: '北美地区(多伦多)'
+        },
+        function (id, name) {
+            alert(name);
+        }
+    );
+
+    var table = $('#hosts').DataTable({
+        "dom": '<"toolbar">frtip',
+        "processing": true,
+        "serverSide": true,
+        'ordering': false,
+        searching: true,
+        scrollX: true,
+        scrollCollapse: false,
+        pageLength: 20,
+        fixedColumns: {
+            leftColumns: 0,
+            rightColumns: 1
+        },
+        "ajax": {
+            url: "server-list",
+            type: 'POST'
+        },
+        "language": {
+            "url": "DataTables-1.10.11/media/languages/chinese.json"
+        },
+        'columns': [
+            {
+                "sClass": "text-center",
+                "data": 'unId',
+                "render": function (data, type, full, meta) {
+                    return '<p style="text-align: center;"><input type="checkbox"  class="tablecheck checkchild"  value="' + data + '" /></p>';
+                },
+                "bSortable": false
+            },
+            {
+                'data' : 'name',
+                render : function(data, type, full, meta) {
+                    return '<p><a>' + full.unId + '</a></p><p>' + data + '</p>';
+                },
+                bSortable : false
+            },
+            {
+                'data' : 'lanIp',
+                render : function(data, type, full, meta) {
+                    return '<p>' + data + '(内网)</p><p>' + full.wanIpSet + '(公网)</p>';
+                },
+                bSortable : false
+            },
+            {"data": 'status'},
+            {"data": 'deadlineTime'},
+            {
+                "sClass": "text-center",
+                "data": 'unId',
+                "render": function (data, type, full, meta) {
+                    return '<a class="power-on"  data-value="' + data + '">开机</a> ' +
+                        '<a class="power-off"  data-value="' + data + '">关机</a> ' +
+                        '<div class="operation" data-value="' + data + '"><a>更多<span class="glyphicon glyphicon-menu-down"></span></a></div>';
+                },
+                "bSortable": false
+            }
+        ],
+        "initComplete": function () {
+            var api = this.api();
+            api.$('tr').smartMenu(imageMenuData);
+            /*api.$('tr').find('td:eq(0)').css('text-align', 'center');*/
+            api.$(".checkchild").click(function () {
+                changeBtnState($(".checkchild:checked").length)
+            });
+            api.$('tr').find('.power-on').click(function () {
+                alert("开机");
+            });
+            api.$('tr').find('.power-off').click(function () {
+                alert("关机");
+            });
+            $(".dataTable-container .toolbar").html($('.toolbar-template').html());
+            $(".operation").DropMenu(menus);
+        }
+    });
+
+    $(".checkall").click(function () {
+        var check = $(this).prop("checked");
+        $(".checkchild").prop("checked", check);
+        $(".checkall").prop("checked", check);
+        changeBtnState($(".checkchild:checked").length)
+    });
+
+    $("#table_refresh").click(function () {
+        reload();
+    });
+    function reload() {
+        $('#hosts').dataTable().api().ajax.reload(function (json) {
+            $('#hosts').dataTable().api().$('tr').smartMenu(imageMenuData);
+            $('#hosts').dataTable().api().$('tr').find('td:eq(0)').css('text-align', 'center');
+            $(".tablecheck").prop('checked', false);
+            changeBtnState(0);
+            $('#hosts').dataTable().api().$(".checkchild").click(function () {
+                changeBtnState($(".checkchild:checked").length)
+            });
+        }, false);
+    }
+
+    var imageMenuData = [
+        [
+            {
+                text: "开机",
+                func: function () {
+                    var id = $(this).find('td:eq(1)').html();
+                    serverAction(id, 'on');
+                }
+            },
+            {
+                text: "关机",
+                func: function () {
+                    var id = $(this).find('td:eq(1)').html();
+                    serverAction(id, 'off');
+                }
+            }
+        ],
+        [
+            {
+                text: "重置",
+                func: function () {
+                    var id = $(this).find('td:eq(1)').html();
+                    serverAction(id, 'reset');
+                }
+            }
+        ]
+    ];
+
+    function serverAction(ids, operationType) {
+        $.post(
+            'server-operation',
+            {
+                serverIds: ids,
+                action: operationType //on|off|reset
+            },
+            function (ret) {
+                if (ret.code == 0) {
+                    if (!ret.data || ret.data.code != 200) {
+                        alert('操作失败');
+                    } else {
+                        alert('操作成功完成');
+                    }
+                    ret.data && console.log(ret.data.detail);
+                } else {
+                    alert(ret.error);
+                }
+                reload();
+            },
+            'json'
+        )
+    }
+
+    function changeBtnState(enable) {
+        if (!enable) {
+            $(".toolbar .instance-restart").addClass('btn-forbidden').attr('disabled', true);
+        } else {
+            $(".toolbar .instance-restart").removeClass('btn-forbidden').removeAttr('disabled');
+        }
+    }
+
+    $("#start_instance").click(function () {
+        var checkeds = $(".checkchild:checked");
+        var serverIdsArr = [];
+        for (var i = 0; i < checkeds.length; i++) {
+            serverIdsArr.push(checkeds[i].value);
+        }
+        var serverIds = serverIdsArr.join(',');
+        serverAction(serverIds, 'on');
+    });
+
+    $("#stop_instance").click(function () {
+        var checkeds = $(".checkchild:checked");
+        var serverIdsArr = [];
+        for (var i = 0; i < checkeds.length; i++) {
+            serverIdsArr.push(checkeds[i].value);
+        }
+        var serverIds = serverIdsArr.join(',');
+        serverAction(serverIds, 'off');
+    });
+})
+</script>

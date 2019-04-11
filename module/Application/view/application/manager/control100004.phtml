@@ -1,0 +1,1158 @@
+<div class="manage-area-nav">
+    <h2><?= $this->layout()->firms[$this->layout()->fid]['name'] ?></h2>
+
+    <div class="list project"></div>
+    <div class="list region"></div>
+    <?php
+    if ($this->get('account')['puid'] == 0) {
+        ?>
+        <a class="unbind" href="javascript:void(0)">解除绑定</a>
+    <?php } ?>
+</div>
+<div class="toolbar-template" style="display: none;">
+    <?php
+    if ($this->auth['username'] == 'admin') {
+        ?>
+        <button class="btn btn-default new-instance-create" data-toggle="modal" data-target="#addInstance">创建</button>
+        <!--<button class="btn btn-default instance-alloc" data-toggle="modal" data-target="#allocInstance">分配到项目</button>-->
+    <?php
+    }
+    ?>
+    <button class="btn btn-default table_refresh">刷新</button>
+    <button class="btn btn-forbidden btn-default instance-restart" disabled>重新启动</button>
+    <div class="dropdown instances_operations">
+        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown"
+                aria-haspopup="true" aria-expanded="true">
+            更多操作
+            <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+            <!--li class 禁止其他包含disabled的名称-->
+            <li class="disabled start" operation="start"><a href="javascript:void(0)">开机</a></li>
+            <li class="disabled stop" operation="stop"><a href="javascript:void(0)">关机</a></li>
+            <li class="stop" operation="addToJumpServer"><a href="javascript:void(0)">添加到堡垒机</a></li>
+            <li class="allocToPro" operation="alloc"><a href="javascript:void(0)">分配至项目</a></li>
+            <!--<li class="disabled"><a href="javascript:alert('敬请期待')">加载密钥</a></li>
+            <li class="disabled"><a href="javascript:alert('敬请期待')">改名</a></li>
+            <li class="disabled"><a href="javascript:alert('敬请期待')">调整网络</a></li>
+            <li class="disabled"><a href="javascript:alert('敬请期待')">销毁</a></li>
+            <li class="disabled"><a href="javascript:alert('敬请期待')">导出选中</a></li>
+            <li class="disabled"><a href="javascript:alert('敬请期待')">导出全部</a></li>-->
+        </ul>
+    </div>
+    <button class="btn btn-default table_export">导出Excel</button>
+    <button class="btn btn-default order">订单<span class="badge"></span></button>
+    <button class="btn btn-default contacts">项目联系人</button>
+
+</div>
+<div class="dataTable-container" style="width: 90%; margin: auto;">
+    <table id="hosts" class="display" cellspacing="0" width="100%">
+        <thead>
+        <tr>
+            <th>
+                <input type="checkbox" class="tablecheck checkall"/>
+            </th>
+            <th>ID/主机名</th>
+            <th>IP</th>
+            <th>状态</th>
+            <th>物理状态</th>
+            <th>项目名</th>
+            <th>更新时间</th>
+            <th>创建时间</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tfoot>
+        <tr>
+            <th>
+                <input type="checkbox" class="tablecheck checkall"/>
+            </th>
+            <th>ID/主机名</th>
+            <th>IP</th>
+            <th>状态</th>
+            <th>物理状态</th>
+            <th>项目名</th>
+            <th>更新时间</th>
+            <th>创建时间</th>
+            <th>操作</th>
+        </tr>
+        </tfoot>
+    </table>
+</div>
+<div class="modal fade" id="addInstance" tabindex="-1" role="dialog" aria-labelledby="">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">添加物理机</h4>
+            </div>
+            <div class="modal-body">
+                <form id="newPH">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="">系统序列号</label>
+                                <input type="text" class="form-control" name="snid">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="">物理机资产编号</label>
+                                <input type="text" class="form-control" name="asset_id">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="">主机名</label>
+                                <input type="text" class="form-control" name="host_name">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="">物理机操作系统</label>
+                                <select class="form-control" name="os_type">
+                                    <?php
+                                    foreach ($this->osTypes as $name) {
+                                        ?>
+                                        <option value="<?= $name ?>"><?= $name ?></option>
+                                    <?php
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="">物理机ip，逗号分割</label>
+                                <input type="text" class="form-control" name="ip">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="">所属区域</label>
+                                <select class="form-control" name="region">
+                                    <?php
+                                    foreach ($this->regions as $id => $name) {
+                                        ?>
+                                        <option value="<?= $id ?>"><?= $name ?></option>
+                                    <?php
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="">ilo 是否可用</label>
+                                <select class="form-control" name="ilo_state">
+                                    <option value=0>可用</option>
+                                    <option value=1>不可用</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="">ilo ip</label>
+                                <input type="text" class="form-control" name="ilo_ip">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="">ilo user</label>
+                                <input type="text" class="form-control" name="ilo_user">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="">ilo password</label>
+                                <input type="text" class="form-control" name="ilo_passwd">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="">外网IP</label>
+                                <input type="text" class="form-control" name="wan_ip">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="">内网IP</label>
+                                <input type="text" class="form-control" name="lan_ip">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="">物理机厂商</label>
+                                <input type="text" class="form-control" name="manufacturer">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="">磁盘大小</label>
+                                <input type="text" class="form-control" name="disk_size">
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="">cpu 核数</label>
+                                <input type="text" class="form-control" name="cpu_num">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="">物理机内存</label>
+                                <input type="text" class="form-control" name="mem_size">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="">备注</label>
+                        <input type="text" class="form-control" name="remark">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="newPHAdd">提交</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="orderManager" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">订单管理</h4>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <select class="form-control" id="orderTypes">
+                        <option value="0">未完成订单</option>
+                        <option value="1">已接受订单</option>
+                        <option value="2">拒绝的订单</option>
+                        <option value="3">我发起的订单</option>
+                        <option value="4">所有订单</option>
+                    </select>
+                </div>
+
+                <table id="orders_list" class="table">
+                    <thead>
+                    <tr>
+                        <!--<th><input type="checkbox"></th>-->
+                        <th>主机ID</th>
+                        <th>原项目</th>
+                        <th>目标项目</th>
+                        <th>发起人</th>
+                        <th>状态</th>
+                        <th>报警时间</th>
+                        <th>创建时间</th>
+                        <th>更新时间</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="contactsManager" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">项目联系人管理</h4>
+            </div>
+            <div class="modal-body">
+                <code><p>当前项目:<span class="curProject"></span></p></code>
+                <br>
+                <fieldset>
+                    <legend>新增项目联系人</legend>
+                    <form class="form-inline">
+                        <div class="form-group">
+                            <label for="conName"></label>
+                            <input type="text" class="form-control" id="conName" placeholder="联系人姓名">
+                        </div>
+                        <div class="form-group">
+                            <label for="conEmail"></label>
+                            <input type="email" class="form-control" id="conEmail" placeholder="Email">
+                        </div>
+                        <div class="form-group">
+                            <label for="conMobile"></label>
+                            <input type="text" class="form-control" id="conMobile" placeholder="联系电话">
+                        </div>
+                        <button type="button" id="addContacts" class="btn btn-default">新增</button>
+                    </form>
+                </fieldset>
+                <br>
+                <br>
+                <fieldset>
+                    <legend>已有项目联系人列表</legend>
+                    <table id="contacts_list" class="table">
+                        <thead>
+                        <tr>
+                            <th>联系人姓名</th>
+                            <th>EMali</th>
+                            <th>电话</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                    </table>
+                </fieldset>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="allocDialog" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">分配至项目</h4>
+            </div>
+            <div class="modal-body">
+                <div class="serverIds"></div>
+                <br>
+
+                <div>
+                    <select class="form-control prolist" name="projectId">
+                        <?php
+                        foreach ($this->projects as $id => $name) {
+                            ?>
+                            <option value="<?= $id ?>"><?= $name ?></option>
+                        <?php
+                        }
+                        ?>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="doAlloc">分配</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+$(function () {
+    $('#newPHAdd').click(function () {
+        var form = $("#newPH");
+        var inputs = form.find('input');
+        for (var i = 0; i < inputs.length; i++) {
+            if ($(inputs[i]).val() === '') {
+                alert($(inputs[i]).parent('div').find('label').html() + "不能为空");
+                return false;
+            }
+        }
+        $('#addInstance').modal('hide');
+        $.post(
+            '/add-physical-host/<?=$this->layout()->fid?>',
+            form.serializeArray(),
+            function (ret) {
+                if (ret.code == 0) {
+                    alert('添加成功');
+                } else if (ret.error) {
+                    alert(ret.error);
+                }
+            },
+            'json'
+        );
+    });
+    $('.manage-area-nav .unbind').click(function () {
+        if (confirm("确认解除绑定?")) {
+            $.post(
+                '/server-unbind/<?=$this->layout()->fid?>',
+                {},
+                function (ret) {
+                    if (ret.code == 0) {
+                        alert('解绑成功');
+                        location.href = '/server-bind/<?=$this->layout()->fid?>'
+                    } else {
+                        if (ret.error) {
+                            alert(ret.error);
+                        } else {
+                            alert('解绑失败');
+                        }
+                    }
+                }
+            );
+        }
+    });
+    var projects = <?=json_encode($this->projects)?>;
+    var menus = [
+        {
+            name: '开机',
+            func: function (menu) {
+                var id = menu.attr('data-value');
+                confirmModal("确认开机?", function () {
+                    serverAction(id, 'start');
+                });
+
+            }
+        },
+        {
+            name: '关机',
+            func: function (menu) {
+                var id = menu.attr('data-value');
+                confirmModal("确认关机?", function () {
+                    serverAction(id, 'stop');
+                });
+            }
+        },
+        {
+            name: '重新启动',
+            func: function (menu) {
+                var id = menu.attr('data-value');
+                confirmModal("确认重启?", function () {
+                    serverAction(id, 'restart');
+                });
+            }
+        },
+        {
+            name: '退库',
+            func: function (menu) {
+                var id = menu.attr('data-value');
+                confirmModal("确认退库?", function () {
+                    serverAction(id, 'returnInstance');
+                });
+            }
+        },
+        {
+            name: '加入堡垒机',
+            func: function (menu) {
+                var id = menu.attr('data-value');
+                var ip = menu.attr('data-wanip');
+                var name = menu.attr('data-name');
+                initJumpServerModal([
+                    [id, ip, name]
+                ]);
+            }
+        },
+        {
+            name: '添加到蓝鲸',
+            func: function (menu) {
+                var hostid = menu.attr('data-value');
+                var wanip = menu.attr('data-wanip');
+                var lanip = menu.attr('data-lanip');
+                var name = menu.attr('data-name');
+                showAddBWModal(
+                    {
+                        wanip : wanip,
+                        lanip : lanip
+                    },
+                    function(id){
+                        $.post(
+                            '/m/add-to-blue-whale/<?=$this->layout()->fid?>',
+                            {
+                                wanip : wanip,
+                                lanip : lanip,
+                                appid : id,
+                                hostid : hostid
+                            },
+                            function(ret) {
+                                hideAddBWModal();
+                                if(ret.code == 0)
+                                {
+                                    alert('添加成功');
+                                } else if (ret.error) {
+                                    alert(ret.error);
+                                }
+                            },
+                            'json'
+                        );
+                    });
+            }
+        }
+    ];
+    var tableDataURL = "/server-list/" + '<?=$this->layout()->fid?>';
+    var table = $('#hosts').DataTable({
+        "dom": '<"toolbar">frtip',
+        "processing": true,
+        "serverSide": true,
+        'ordering': false,
+        searching: false,
+        scrollX: true,
+        //scrollY:300,
+        scrollCollapse: false,
+        searchDelay: 1000,
+        pageLength: 10,
+        fixedColumns: {
+            leftColumns: 0,
+            rightColumns: 1
+        },
+        "ajax": {
+            url: tableDataURL,
+            type: 'POST',
+            data: function (d) {
+                d.p = $('.project').attr('data-value');
+                d.r = $('.region').attr('data-value');
+            }
+        },
+        "language": {
+            "url": "/DataTables-1.10.11/media/languages/chinese.json",
+            searchPlaceholder: '主机名或内网IP(IP,IP,IP...)'
+        },
+        'columns': [
+            {
+                "sClass": "text-center",
+                "data": 'unId',
+                render: function (data, type, full, meta) {
+                    return '<p style="text-align: center;">' +
+                        '<input type="checkbox"  class="tablecheck checkchild" operation-status="' + full.operationStatus + '"  value="' + data + '" />' +
+                        '</p>';
+                },
+                "bSortable": false,
+                "searchable": false
+            },
+            {
+                'data': 'name',
+                render: function (data, type, full, meta) {
+                    return '<p><a href="/detail/<?=$this->layout()->fid?>/' + full.unId + '/' + full.rid + '">' + full.unId + '</a></p><p>' + data + '</p>';
+                },
+                bSortable: false
+            },
+            {
+                'data': 'lanIp',
+                render: function (data, type, full, meta) {
+                    return '<p>' + data + (full.wanIpSet ? ('(内网)</p><p>' + full.wanIpSet + '(公网)</p>') : '</p>');
+                },
+                bSortable: false
+            },
+            {
+                "data": 'status',
+                render: function (data, type, full, meta) {
+                    return '<span class="status" style="color:#06c290;" status-value=' + data + '>' + data + '</span>';
+                },
+                "searchable": false
+            },
+            {
+                "data": 'state',
+                render: function (data, type, full, meta) {
+                    return '<span class="state" style="color:#06c290;" status-value=' + data + '>' + data + '</span>';
+                },
+                "searchable": false
+            },
+            /*{
+                "data": 'pid',
+                render: function (data, type, full, meta) {
+                    return projects[data] || data;
+                },
+                "searchable": false
+            },*/
+            {
+                data: 'remark',
+                bSortable: false,
+                searchable: false
+            },
+            {
+                data: 'update_at',
+                bSortable: false,
+                searchable: false
+            },
+            {
+                data: 'create_at',
+                bSortable: false,
+                searchable: false
+            },
+            {
+                "sClass": "text-center",
+                "data": 'unId',
+                render: function (data, type, full, meta) {
+                    /*'<a class="power-on"  data-value="' + data + '">开机</a> ' +
+                     '<a class="power-off"  data-value="' + data + '">关机</a> ' +*/
+                    return '<div class="operation" data-lanip="' + full.lanIp + '" data-wanip="' + full.wanIpSet + '" data-name="' + full.name + '" operation-status="' + full.operationStatus + '" data-value="' + data + '"><a>操作<span class="glyphicon glyphicon-menu-down"></span></a></div>';
+                },
+                "bSortable": false,
+                "searchable": false
+            }
+        ],
+        drawCallback: function (settings) {
+            var api = this.api();
+            $(".tablecheck").prop('checked', false);
+            api.$('.tablecheck').prop('checked', false);
+            api.$(".checkchild").unbind().click(function () {
+                changeBtnState()
+            });
+            $(".dataTable-container .toolbar").html($('.toolbar-template').html());
+            for (var i = 0; i < api.$('tr').length; i++) {
+                var tr = $(api.$('tr')[i]);
+                var opStatus = tr.find('td div.operation').attr('operation-status');
+                var statusList = [];
+                for (var j = 0; j < opStatus.length; j++) {
+                    statusList.push(parseInt(opStatus[j]));
+                }
+                tr.find(".operation").DropMenu(menus, statusList);
+            }
+            $(".dataTable-container .table_refresh").unbind().click(function () {
+                reload();
+            });
+            $(".dataTable-container .instance-restart").unbind().click(function () {
+                var checkeds = $(".checkchild:checked");
+                var serverIdsArr = [];
+                for (var i = 0; i < checkeds.length; i++) {
+                    serverIdsArr.push(checkeds[i].value);
+                }
+                var serverIds = serverIdsArr.join(',');
+                if (confirm('确认重启?')) {
+                    serverAction(serverIds, 'restart');
+                }
+            });
+            if (api.$('tr').length > 0) {
+                $(".dataTable-container .table_export").removeClass('btn-forbidden').removeAttr('disabled');
+            } else {
+                $(".dataTable-container .table_export").addClass('btn-forbidden').attr('disabled', true);
+            }
+            $(".dataTable-container .table_export").unbind().click(function () {
+                confirmModal(
+                    '确认导出?',
+                    function (data) {
+                        var p = $('.project').attr('data-value');
+                        var r = $('.region').attr('data-value');
+                        var searchInput = $('.dataTable-container input[type=search]');
+                        var s = '';
+                        if (searchInput.length > 0) {
+                            s = searchInput.val();
+                        }
+                        var url = '/get-excel/<?=$this->layout()->fid?>';
+
+                        $('#iframe-download').remove();
+                        var frame = $('<iframe>');
+                        frame.attr('id', 'iframe-download');
+                        frame.attr('src', url + '?p=' + p + '&r=' + r + '&s=' + s);
+                        frame.css('display', 'none');
+                        $('body').append(frame);
+                        alert('下载已经开始,请耐心等待,<code>不要重复操作</code>!');
+                    }
+                );
+            });
+            $('.dataTable-container .order').unbind().click(function () {
+                fillOrder();
+                $('#orderManager').modal('show');
+            });
+            $('.dataTable-container .contacts').unbind().click(function () {
+                $(".curProject").html(projects[$('.project').attr('data-value')]);
+                $('#addContacts').unbind().click(function () {
+                    var name = $('#conName').val();
+                    var mobile = $('#conMobile').val();
+                    var email = $('#conEmail').val();
+                    if (!name || !mobile || !email) {
+                        alert('请填写所有表单项');
+                        return false;
+                    }
+                    window.confirmModal('确认新增项目联系人?', function () {
+                        $.post(
+                            '/p-contacts-create/<?=$this->layout()->fid?>',
+                            {
+                                name: name,
+                                mobile: mobile,
+                                email: email,
+                                pid: $('.project').attr('data-value')
+                            },
+                            function (ret) {
+                                if (ret.code == 0) {
+                                    alert('提交成功');
+                                    $('#conName').val('');
+                                    $('#conMobile').val('');
+                                    $('#conEmail').val('');
+                                    $('#contacts_list').dataTable().api().ajax.reload(function (json) {
+                                    }, false);
+                                } else if (ret.error) {
+                                    alert(ret.error);
+                                }
+                            },
+                            'json'
+                        );
+                    });
+                });
+                fillContacts();
+                $('#contactsManager').modal('show');
+            });
+            $('.dataTable-container .instances_operations li').unbind().click(function () {
+                var me = $(this);
+                if (me.hasClass('disabled')) {
+                    return;
+                }
+                var action = me.attr('operation');
+                if (action) {
+                    if (action == 'addToJumpServer') {
+                        var checkeds = $(".checkchild:checked");
+                        var data = [];
+                        for (var i = 0; i < checkeds.length; i++) {
+                            var operation = $(checkeds[i]).parent('p').parent('td').parent('tr').find('.operation');
+                            var id = operation.attr('data-value');
+                            var ip = operation.attr('data-wanip');
+                            var name = operation.attr('data-name');
+                            data.push([id, ip, name])
+                        }
+                        initJumpServerModal(data);
+                    } else if (action == 'alloc') {
+                        var checkeds = $(".checkchild:checked");
+                        var serverIdsArr = [];
+                        for (var i = 0; i < checkeds.length; i++) {
+                            if ($(checkeds[i]).attr('operation-status')[5] == 0) {
+                                continue;
+                            }
+                            serverIdsArr.push(checkeds[i].value);
+                        }
+                        if (!serverIdsArr.length) {
+                            alert('无可转移主机（物理状态需为active）');
+                            return false;
+                        }
+                        var serverIds = serverIdsArr.join(',');
+                        $('#allocDialog').find('.serverIds').html('分配主机<code>' + serverIds + '</code>至项目:');
+                        $('#allocDialog').modal('show');
+
+                    }
+                    else if (confirm('确认' + operations[action] + '?')) {
+                        var checkeds = $(".checkchild:checked");
+                        var serverIdsArr = [];
+                        for (var i = 0; i < checkeds.length; i++) {
+                            serverIdsArr.push(checkeds[i].value);
+                        }
+                        var serverIds = serverIdsArr.join(',');
+                        serverAction(serverIds, action);
+                    }
+                }
+            });
+        }
+    });
+
+    function fillOrder() {
+        var orderTableDataURL = '/p-get-order/<?=$this->layout()->fid?>';
+        if (window.orderTable) {
+            $('#orderTypes').val(0);
+            $('#orders_list').dataTable().api().ajax.url(orderTableDataURL + '?t=0').load();
+        } else {
+
+            $('#orderTypes').change(function(data){
+                var type = data.target.value;
+                $('#orders_list').dataTable().api().ajax.url(orderTableDataURL + '?t=' + type).load();
+            });
+            window.orderTable = $('#orders_list').DataTable({
+                dom: '<"toolbar">frtip',
+                processing: true,
+                serverSide: true,
+                ordering: false,
+                searching: false,
+                scrollX: true,
+                scrollY: '50vh',
+                scrollCollapse: true,
+                searchDelay: 1000,
+                paging: false,
+                //pageLength: 10,
+                ajax: {
+                    url: orderTableDataURL,
+                    type: 'POST',
+                    data: function (d) {
+                        d.pid = $('.project').attr('data-value');
+                        d.r = $('.region').attr('data-value');
+                    }
+                },
+                language: {
+                    "url": "/DataTables-1.10.11/media/languages/chinese.json"
+                    //searchPlaceholder: '主机名或内网IP(IP,IP,IP...)'
+                },
+                columns: [
+                    /*{
+                     "sClass": "text-center",
+                     "data": 'id',
+                     render: function (data, type, full, meta) {
+                     return '<p style="text-align: center;">' +
+                     '<input type="checkbox" data-id="'+data+'"  class="tablecheck check2child"  value="' + data + '"/></p>';
+                     },
+                     "bSortable": false,
+                     "searchable": false
+                     },*/
+                    {
+
+                        data: 'snids',
+                        bSortable: false
+                    },
+                    {
+                        data: 'resource_project',
+                        render: function (data, type, full, meta) {
+                            return projects[data];
+                        },
+                        bSortable: false
+                    },
+                    {
+                        data: 'dest_project',
+                        render: function (data, type, full, meta) {
+                            return projects[data];
+                        },
+                        bSortable: false
+                    },
+                    {
+                        data: 'user',
+                        bSortable: false
+                    },
+                    {
+                        data: 'state',
+                        bSortable: false
+                    },
+                    {
+                        data: 'warnning_times',
+                        bSortable: false
+                    },
+                    {
+                        data: 'create_at',
+                        bSortable: false
+                    },
+                    {
+                        data: 'update_at',
+                        bSortable: false
+                    },
+                    {
+                        sClass: "text-center",
+                        data: 'id',
+                        render: function (data, type, full, meta) {
+                            if($('#orderTypes').val() == 3 && full.state == 'unfinished')
+                            {
+                                return '<span class="order_operation" data-id="' + data + '"><a href="javascript:void(0)" class="order_cancel">撤销</a></span>';
+                            } else if ($('#orderTypes').val() != 0) {
+                                return '-';
+                            }
+                            return '<span class="order_operation" data-id="' + data + '"><a href="javascript:void(0)" class="order_accept">接受</a><br><a href="javascript:void(0)" class="order_deny">拒绝</a></span>';
+                        },
+                        bSortable: false,
+                        searchable: false
+                    }
+                ],
+                drawCallback: function (settings) {
+                    var api = this.api();
+                    if($('#orderTypes').val() == 0) {
+                        if (api.$('tr').length > 0) {
+                            $('.order .badge').html(api.$('tr').length);
+                        } else {
+                            $('.order .badge').html('');
+                        }
+                    }
+
+                    api.$('.order_operation').find('.order_accept').click(function () {
+                        var id = $(this).parent('span').attr('data-id');
+                        var pid = $('.project').attr('data-value');
+                        window.confirmModal('确认接受订单?', function () {
+                            $.post(
+                                '/p-deal-order/<?=$this->layout()->fid?>',
+                                {
+                                    order_ids: id,
+                                    accept: 1,
+                                    pid: pid
+                                },
+                                function (ret) {
+                                    if (ret.code == 0) {
+                                        alert('提交成功');
+                                        $('#orders_list').dataTable().api().ajax.reload(function (json) {
+                                        }, false);
+                                    } else if (ret.error) {
+                                        alert(ret.error);
+                                    }
+                                },
+                                'json'
+                            );
+                        });
+                    });
+                    api.$('.order_operation').find('.order_deny').click(function () {
+                        var id = $(this).parent('span').attr('data-id');
+                        var pid = $('.project').attr('data-value');
+                        window.confirmModal('确认拒绝订单?', function () {
+                            $.post(
+                                '/p-deal-order/<?=$this->layout()->fid?>',
+                                {
+                                    order_ids: id,
+                                    accept: 0,
+                                    pid: pid
+                                },
+                                function (ret) {
+                                    if (ret.code == 0) {
+                                        //alert('提交成功');
+                                        $('#orders_list').dataTable().api().ajax.reload(function (json) {
+                                        }, false);
+                                    } else if (ret.error) {
+                                        alert(ret.error);
+                                    }
+                                },
+                                'json'
+                            );
+                        });
+                    });
+                    api.$('.order_operation').find('.order_cancel').click(function () {
+                        var id = $(this).parent('span').attr('data-id');
+                        var pid = $('.project').attr('data-value');
+                        window.confirmModal('确认撤销订单?', function () {
+                            $.post(
+                                '/p-cancel-order/<?=$this->layout()->fid?>',
+                                {
+                                    order_ids: id,
+                                    pid: pid
+                                },
+                                function (ret) {
+                                    if (ret.code == 0) {
+                                        alert('撤销成功');
+                                        $('#orders_list').dataTable().api().ajax.reload(function (json) {
+                                        }, false);
+                                    } else if (ret.error) {
+                                        alert(ret.error);
+                                    }
+                                },
+                                'json'
+                            );
+                        });
+                    });
+                }
+            });
+        }
+    }
+
+    function fillContacts() {
+        if (window.contactsTable) {
+            window.contactsTable.ajax.reload(function (json) {
+            }, false);
+        } else {
+            var contactsTableDataURL = '/p-contacts-list/<?=$this->layout()->fid?>';
+            window.contactsTable = $('#contacts_list').DataTable({
+                dom: '<"toolbar">frtip',
+                processing: true,
+                serverSide: true,
+                ordering: false,
+                searching: false,
+                scrollX: true,
+                scrollY: '50vh',
+                scrollCollapse: true,
+                searchDelay: 1000,
+                paging: false,
+                //pageLength: 10,
+                ajax: {
+                    url: contactsTableDataURL,
+                    type: 'POST',
+                    data: function (d) {
+                        d.pid = $('.project').attr('data-value');
+                    }
+                },
+                language: {
+                    "url": "/DataTables-1.10.11/media/languages/chinese.json"
+                    //searchPlaceholder: '主机名或内网IP(IP,IP,IP...)'
+                },
+                columns: [
+                    /*{
+                     "sClass": "text-center",
+                     "data": 'id',
+                     render: function (data, type, full, meta) {
+                     return '<p style="text-align: center;">' +
+                     '<input type="checkbox" data-id="'+data+'"  class="tablecheck check2child"  value="' + data + '"/></p>';
+                     },
+                     "bSortable": false,
+                     "searchable": false
+                     },*/
+                    {
+
+                        data: 'name',
+                        bSortable: false
+                    },
+                    {
+
+                        data: 'email',
+                        bSortable: false
+                    },
+                    {
+
+                        data: 'phone',
+                        bSortable: false
+                    },
+                    {
+                        sClass: "text-center",
+                        data: 'id',
+                        render: function (data, type, full, meta) {
+                            return '<span class="contacts_operation" data-id="' + data + '"><a href="javascript:void(0)" class="contacts_del">删除</a></span>';
+                        },
+                        bSortable: false,
+                        searchable: false
+                    }
+                ],
+                drawCallback: function (settings) {
+                    var api = this.api();
+                    api.$('.contacts_operation').find('.contacts_del').click(function () {
+                        var id = $(this).parent('span').attr('data-id');
+                        var pid = $('.project').attr('data-value');
+                        window.confirmModal('确认删除项目联系人?', function () {
+                            $.post(
+                                '/p-contacts-delete/<?=$this->layout()->fid?>',
+                                {
+                                    ids: id,
+                                    pid: pid
+                                },
+                                function (ret) {
+                                    if (ret.code == 0) {
+                                        //alert('删除成功');
+                                        $('#contacts_list').dataTable().api().ajax.reload(function (json) {
+                                        }, false);
+                                    } else if (ret.error) {
+                                        alert(ret.error);
+                                    }
+                                },
+                                'json'
+                            );
+                        });
+                    });
+                }
+            });
+        }
+    }
+
+    $('.project').DropDownList(
+        projects,
+        function (id, name) {
+            $('#hosts').dataTable().api().ajax.url(tableDataURL + '?p=' + id + '&r=' + $('.region').attr('data-value')).load();
+            var orderTableDataURL = '/p-get-order/<?=$this->layout()->fid?>';
+            $('#orderTypes').val(0);
+            $('#orders_list').dataTable().api().ajax.url(orderTableDataURL + '?t=0').load();
+
+        }
+    );
+
+    $('.region').DropDownList(
+        <?=json_encode($regions)?>,
+        function (id, name) {
+            $('#hosts').dataTable().api().ajax.url(tableDataURL + '?p=' + $('.project').attr('data-value') + '&r=' + id).load();
+        }
+    );
+    $(".checkall").click(function () {
+        var check = $(this).prop("checked");
+        $(".checkchild").prop("checked", check);
+        $(".checkall").prop("checked", check);
+        changeBtnState()
+    });
+
+
+    function reload() {
+        $('#hosts').dataTable().api().ajax.reload(function (json) {
+        }, false);
+    }
+
+    var serverOperationURL = '/server-operation/' + '<?=$this->layout()->fid?>';
+
+    function serverAction(ids, operationType) {
+        var pid = $('.project').attr('data-value');
+        var rid = $('.region').attr('data-value');
+        $.post(
+            serverOperationURL,
+            {
+                serverIds: ids,
+                action: operationType, //start|stop|restart
+                pid: pid,
+                rid: rid
+            },
+            function (ret) {
+                if (ret.code == 0) {
+                    alert('操作成功完成');
+                    ret.data && console.log(ret.data);
+                } else {
+                    alert(ret.error);
+                }
+                reload();
+            },
+            'json'
+        )
+    }
+
+    var operations = {
+        start: '开机',
+        stop: '关机',
+        restart: '重启'
+    };
+
+    function changeBtnState() {
+        var opMenu = {
+            start: 0,
+            stop: 0,
+            restart: 0
+        };
+        var checked = $(".checkchild:checked");
+        for (var i = 0; i < checked.length; i++) {
+            var opStatus = $(checked[i]).attr('operation-status');
+            opMenu.start += parseInt(opStatus[0]);
+            opMenu.stop += parseInt(opStatus[1]);
+            opMenu.restart += parseInt(opStatus[2]);
+        }
+        if (!opMenu.restart) {
+            $(".toolbar .instance-restart").addClass('btn-forbidden').attr('disabled', true);
+        } else {
+            $(".toolbar .instance-restart").removeClass('btn-forbidden').removeAttr('disabled');
+        }
+
+        var dropMenu = $('.instances_operations');
+        if (opMenu.start) {
+            dropMenu.find('.start').removeClass('disabled');
+        } else {
+            dropMenu.find('.start').addClass('disabled');
+        }
+        if (opMenu.stop) {
+            dropMenu.find('.stop').removeClass('disabled');
+        } else {
+            dropMenu.find('.stop').addClass('disabled');
+        }
+    }
+
+    $('#doAlloc').click(function () {
+        var tpid = $('.prolist').val();
+        var pid = $('.project').attr('data-value');
+        var serverIds = $("#allocDialog").find('.serverIds').find('code').html();
+        $.post(
+            '/p-create-order/<?=$this->layout()->fid?>',
+            {
+                ids: serverIds,
+                tpid: tpid,
+                pid: pid
+            },
+            function (ret) {
+                if (ret.code == 0) {
+                    alert('操作成功完成');
+                    ret.data && console.log(ret.data);
+                } else {
+                    alert(ret.error);
+                }
+                $("#allocDialog").modal('hide');
+                reload();
+
+            },
+            'json'
+        )
+    });
+    fillOrder();
+})
+</script>

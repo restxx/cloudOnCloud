@@ -1,0 +1,1 @@
+alter table users add `group` tinyint(4) default 0;

@@ -1,0 +1,151 @@
+<style type="text/css">
+    .lijun_table {
+        display: table;
+        table-layout: fixed;
+        width: 100%;
+        margin-top: 50px;
+        margin-bottom: 26px;
+        border-bottom: 1px solid #E6EBF2;
+    }
+
+    .lijun_table_caption {
+        display: table-caption;
+        margin-bottom: 14px;
+    }
+
+    .lijun_chart_title {
+        font-size: 14px;
+    }
+
+</style>
+<div class="detail-tab">
+    <div class="tab-page tab-content-cur">
+        <div class="box col-md-12">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <div class="panel-title"><span style="font-size: 12px;">数据图</span></div>
+                </div>
+                <div class="panel-body">
+                    <div class="box-content">
+                        <div class="lijun_table">
+                            <h3 class="lijun_table_caption">球球用户Ping各省趋势图</h3>
+
+                            <br>
+
+                            <div id="netflowGrap1" style="max-width:95%;"></div>
+                            <span style="width: 50px;"></span>
+                            <div id="netflowGrap2" style="max-width:95%;"></div>
+
+                            <span style="width: 50px;"></span>
+                            <div id="netflowGrap3" style="max-width:95%;"></div>
+                            <span style="width: 50px;"></span>
+                            <div id="netflowGrap4" style="max-width:95%;"></div>
+                            <span style="width: 50px;"></span>
+                            <div id="netflowGrap5" style="max-width:95%;"></div>
+                            <span style="width: 50px;"></span>
+                            <div id="netflowGrap6" style="max-width:95%;"></div>
+                            <span style="width: 50px;"></span>
+                            <div id="netflowGrap7" style="max-width:95%;"></div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style type="text/css">
+    .lijun_btn {
+        margin-left: 10px;
+    }
+
+</style>
+
+<script>
+    $(function () {
+
+        var option = {
+            title: {
+                text: '不同城市的Ping数据',
+                x: -20
+            },
+            credits: {
+                enabled: false
+            },
+            yAxis: {
+                title: {
+                    text: ' Ms'
+                },
+                plotLines: [{
+                    value: 0,
+                    width: 1,
+                    color: '#808080'
+                }]
+            },
+            tooltip: {
+                valueSuffix: ' Ms'
+            },
+            legend: {
+                layout: 'vertical',
+                align: 'right',
+                verticalAlign: 'middle',
+                borderWidth: 0
+            }
+        };
+
+
+        <?php
+
+        foreach ($datas as $num => $data) { ?>
+
+//        var data = {
+//            series: [{
+//                name: '东京',
+//                data: [7.0, 6.9, 9.5, 14.5, 18.2, 21.5, 25.2, 26.5, 23.3, 18.3, 13.9, 9.6]
+//            }, {
+//                name: '纽约',
+//                data: [-0.2, 0.8, 5.7, 11.3, 17.0, 22.0, 24.8, 24.1, 20.1, 14.1, 8.6, 2.5]
+//            }, {
+//                name: '柏林',
+//                data: [-0.9, 0.6, 3.5, 8.4, 13.5, 17.0, 18.6, 17.9, 14.3, 9.0, 3.9, 1.0]
+//            }, {
+//                name: '伦敦',
+//                data: [3.9, 4.2, 5.7, 8.5, 11.9, 15.2, 17.0, 16.6, 14.2, 10.3, 6.6, 4.8]
+//            }],
+//            xAxis: {
+//                categories: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月']
+//            }
+//        };
+//        $.extend(option, data);
+//
+//        void(0);
+
+        var serial = [],
+            categories = [];
+
+        <?php
+        foreach ($data as $province =>$row) {?>
+
+        var ping = [];
+
+        ping['name'] = '<?=$province?>';
+        ping["data"] =<?=json_encode($row['ping'])?>;
+
+        serial.push(ping);
+
+        categories = <?=json_encode($row['time'])?>;
+        <?php }?>
+
+        $.extend(option, {
+            series: serial, xAxis: {
+                categories: categories
+            }
+        });
+
+
+        var chart2 = new Highcharts.Chart('netflowGrap<?=$num?>', option);
+
+        <?php }        ?>
+
+    });
+</script>

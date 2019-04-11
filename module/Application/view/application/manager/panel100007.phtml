@@ -1,0 +1,541 @@
+<link rel="stylesheet" type="text/css" media="all" href="/css/jquery.dataTables.min.css"
+      xmlns="http://www.w3.org/1999/html"/>
+<link rel="stylesheet" type="text/css" media="all" href="/css/jquery.datatable.extend.css"/>
+<script type="text/javascript" src="/js/listScroll.js"></script>
+<style type="text/css">
+    .lijun_table {
+        display: table;
+        table-layout: fixed;
+        width: 100%;
+        margin-bottom: 26px;
+        border-bottom: 1px solid #E6EBF2;
+    }
+
+    .lijun_select {
+        display: inline-block;
+        min-width: 30px;
+        height: 30px;
+        line-height: 30px;
+        padding: 4px 6px;
+        font-size: 12px;
+        color: #555;
+        vertical-align: middle;
+        -moz-border-radius: 4px;
+        border-radius: 4px;
+        border-color: rgb(169, 169, 169);
+    }
+
+    .overviews_detail {
+        text-decoration: none;
+        cursor: pointer;
+        display: block;
+    }
+
+    .lijun_roll ul {
+        list-style: none;
+    }
+
+    .lijun_roll-box {
+        height: 180px;
+        margin-left: 20px;
+        background-color: #fcfcfd;
+        overflow: hidden;
+        position: relative;
+        _zoom: 100;
+    }
+
+    .lijun_roll h1 {
+        margin-bottom: 15px;
+        padding-left: 20px;
+        color: #370188;
+    }
+
+    .lijun_roll-list {
+        position: absolute;
+    }
+
+    .lijun_roll-list {
+        float: left;
+    }
+
+    .lijun_roll-list li {
+        _display: inline;
+        margin-right: 15px;
+        height: 24px;
+        line-height: 24px;
+        overflow: hidden;
+        word-wrap: normal;
+    }
+
+    .lijun_roll-list li a {
+        text-decoration: none;
+        color: #000;
+    }
+
+    .lijun_roll-list li a:hover {
+        -webkit-transition: color .2s linear, background-color .3s linear;
+        -moz-transition: color .2s linear, background-color .3s linear;
+        -ms-transition: color .2s linear, background-color .3s linear;
+        -o-transition: color .2s linear, background-color .3s linear;
+        transition: color .2s linear, background-color .3s linear;
+        color: #FF4400;
+        text-decoration: underline;
+    }
+
+    .lijun_roll-list li a:visited {
+        color: #290065;
+    }
+
+</style>
+<div class="manage-area-nav">
+    <h2><?= $this->layout()->firms[$this->layout()->fid]['name'] ?></h2>
+
+    <div class="list project">
+        <select data-placeholder="--项目--" class="lijun_select" id="select_project">
+            <?php foreach ($projects as $pid => $project) { ?>
+                <option value="<?= $pid ?>"><?= $project ?></option>
+            <?php } ?>
+        </select>
+
+        <select data-placeholder="--选择月份--" class="lijun_select" id="select_month">
+            <?php foreach ($months as $month) { ?>
+                <option value="<?= $month['index'] ?>"><?= $month['month'] ?></option>
+            <?php } ?>
+        </select>
+
+        <a>
+            <div class="glyphicon glyphicon-search" style="cursor: pointer;margin-left: 5px;"
+                 id="getDatas"></div>
+        </a>
+    </div>
+    <a style="float: right" href="/control/100007">管理</a>
+
+</div>
+
+<div class="box col-md-4">
+    <div class="panel panel-info" style="height: 250px;">
+        <div class="panel-heading">
+            <div class="panel-title"><span style="font-size: 12px;">主机费用</span></div>
+        </div>
+        <div class="panel-body">
+            <div id="overviewsGrap" style="height: 180px;"></div>
+        </div>
+    </div>
+</div>
+
+<div class="box col-md-3">
+    <div class="panel panel-info" style="height: 250px;">
+        <div class="panel-heading">
+            <div class="panel-title"><span style="font-size: 12px;">主机费用</span></div>
+        </div>
+        <div class="panel-body">
+            <table class="table table-striped table-hover" style="width: 100%;" id="OverviewsTable">
+                <thead>
+                <tr>
+                    <th>区域</th>
+                    <th>数量</th>
+                    <th>费用</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="box col-md-5">
+    <div class="panel panel-info" style="height: 250px;">
+        <div class="panel-heading">
+            <div class="panel-title"><span style="font-size: 12px;">日志</span></div>
+        </div>
+        <div class="panel-body">
+            <div id="Roll_Container" class="lijun_roll-box">
+                <ul class="Roll_Content lijun_roll-list" style="position: absolute;width: 100%;">
+                    <?php foreach ($logs as $log) { ?>
+                        <li style="min-height:130px;border-bottom: 1px solid #f0f0f0;padding:10px;">
+                            <div class="info" style="height: 29px;line-height: 29px;font-size: 12px;">
+                                <i style="font-style: normal;color: #333;float: left;text-indent: 5px;font-size: 16px;">
+                                    <?= $log['username'] ?>
+                                </i>
+                                <span style="color: #bbb;float: right;"><?= $log['create_at'] ?></span>
+                            </div>
+                            <div class="context" style="line-height: 29px;font-size: 16px;">
+                                <p style="font-size: 14px;color: #333;line-height: 22px;margin: 5px 0 5px 48px;">
+                                    在主机 <strong><?= $log['host_id'] ?></strong> 上执行
+                                    <strong><?= $log['operation'] ?></strong> 操作</p>
+                            </div>
+                            <div class="result"
+                                 style="font-size: 12px;color: #999;height: 21px;margin: 5px 0 5px 5px;line-height: 10px;overflow: hidden;">
+                                <span style="float: left;">结果:<?= $log['result'] == 1 ? "成功" : "失败" ?></span>
+                                <span style="float: right">属于 <?= $log['pid'] ?> 项目</span>
+                            </div>
+                        </li>
+                    <?php } ?>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="box col-md-12">
+    <div class="panel panel-info">
+        <div class="panel-heading">
+            <div class="panel-title"><span style="font-size: 12px;">带宽监控</span></div>
+        </div>
+        <div class="panel-body">
+            <div class="lijun_table">
+                <div id="netflowGrap0" class="graps"></div>
+
+                <div id="netflowGrap1" class="graps" style="display: none"></div>
+                <div id="netflowGrap2" class="graps" style="display: none"></div>
+                <div id="netflowGrap3" class="graps" style="display: none"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modal_netflowDetail" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">主机费用明细</h3>
+            </div>
+            <div class="panel-body">
+                <form id="form_editFinancialPublicGroup">
+                    <div class="form-group">
+                        <table class="table table-hover table-bordered table-striped" style="margin-bottom: 0px;"
+                               id="flowDetail">
+                            <thead>
+                            <tr>
+                                <th>月份</th>
+                                <th>机房</th>
+                                <th>服务器ID</th>
+                                <th>费用</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="pull-right">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">确定</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+function showDetail(object) {
+    var region = $(object).attr("region"),
+        pid = $("#select_project").val(),
+        month = $("#select_month").val(),
+        panelDataDetailURL = '/get-panel-flow-detail/' + '<?=$this->layout()->fid?>';
+
+    $.post(panelDataDetailURL, {pid: pid, month: month, region: region}, function (data) {
+
+        var template = "<tr align='center' ><td>#month#</td><td>#region#</td><td>#projectid#</td><td>#fee# 元</td></tr>",
+            tbody = $('#flowDetail tbody');
+
+        tbody.empty();
+
+        if (data.code == 0) {
+            $.each(data.data, function (k, v) {
+
+                var dom = template.replace("#month#", v.date)
+                    .replace("#region#", v.region)
+                    .replace("#projectid#", v.projectid)
+                    .replace("#fee#", v.fee);
+
+                tbody.append(dom);
+            });
+
+            var dom = $("#modal_netflowDetail");
+
+            dom.modal({
+                backdrop: false,
+                keyboard: false
+            });
+        } else {
+            alert(data.msg);
+        }
+    });
+
+    return false;
+
+}
+
+$(function () {
+    window.onresize = function () {
+        var nav = $(".manage-area-nav");
+        $("#netflowGrap0").width(nav.width() - 20 + "px");
+        $("#netflowGrap1").width(nav.width() - 20 + "px");
+        $("#netflowGrap2").width(nav.width() - 20 + "px");
+        $("#netflowGrap3").width(nav.width() - 20 + "px");
+
+    };
+    window.onresize();
+
+    $("#getDatas").on("click", function () {
+        var pid = $("#select_project").val(),
+            month = $("#select_month").val(),
+            panelDataURL = '/get-panel-data/' + '<?=$this->layout()->fid?>';
+
+        loading("show");
+
+        $.post(panelDataURL, {pid: pid, month: month}, function (data) {
+            loading();
+            if (data != undefined && data != "" && data != null) {
+                fillOverview(data.overviews);
+
+                if (data.grap != undefined && data.grap != "" && data.grap != null) {
+                    $(".graps").hide();
+
+                    $.each(data.grap.head, function (k, v) {
+                        fillFlowGrap(data.grap, k, v);
+                    });
+                } else {
+                    alert("获取图表数据失败");
+                }
+            } else {
+                alert("查询无数据")
+            }
+
+        });
+    });
+
+    function fillOverview(data) {
+        var table = $("#OverviewsTable"),
+            template = '<tr><td>#region#</td><td>#num#</td><td>#sum#元</td><td><a class="overviews_detail" region="#region#" onclick="showDetail(this);">明细</a></td></tr>',
+            tableBody = table.find('tbody').empty();
+
+        if (!data.body || data.body.length == 0) {
+            tableBody.append('<tr><td colspan="4">无数据</td></tr>');
+        } else {
+            $.each(data.body, function (k, v) {
+                var row = template.replace(/#region#/g, v.idc)
+                    .replace("#num#", v.count)
+                    .replace("#sum#", v.price);
+
+                tableBody.append(row);
+            });
+
+            fillOverviewGrap(data);
+        }
+    }
+
+    function fillOverviewGrap(data) {
+
+        var dom = $("#overviewsGrap"),
+            body = [],
+            tdata = [];
+
+        $.each(data.body, function (k, v) {
+            tdata.push(v.price);
+        });
+
+        body.push({"data": tdata, "name": "主机费用", dataLabels: {
+            enabled: true,
+            style: {
+                fontSize: '13px',
+                fontFamily: 'Verdana, sans-serif'
+            }
+        }});
+
+        options = {
+            colors: ["#7cb5ec", "#f7a35c", "#90ee7e", "#7798BF", "#aaeeee", "#ff0066", "#eeaaee",
+                "#55BF3B", "#DF5353", "#7798BF", "#aaeeee"],
+            chart: {
+                type: 'column'
+            },
+            title: {
+                text: ""
+            },
+            xAxis: {
+                title: {
+                    enabled: false
+                },
+                categories: data.head
+            },
+            subtitle: {
+                text: $("#select_month option:selected").text() + " " + $("#select_project option:selected").text()
+            },
+            credits: {
+                enabled: false
+            },
+            legend: {
+                enabled: false
+            },
+            lang: {
+                noData: "无数据"
+            },
+            noData: {
+                style: {
+                    fontWeight: 'bold',
+                    fontSize: '15px',
+                    color: '#303030'
+                }
+            },
+            yAxis: {
+                title: {
+                    enabled: false
+                }
+            },
+            tooltip: {
+                headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                    '<td style="padding:0"><b>{point.y:.1f} 元</b></td></tr>',
+                footerFormat: '</table>',
+                shared: true,
+                useHTML: true
+            },
+            plotOptions: {
+                column: {
+                    pointPadding: 0.2,
+                    borderWidth: 0
+                },
+                line: {
+                    dataLabels: {
+                        enabled: true
+                    },
+                    enableMouseTracking: false
+                }
+            },
+            series: body
+        };
+
+        dom.highcharts(options);
+
+    }
+
+    function fillFlowGrap(data, k, v) {
+        window.onresize();
+        var dom = $("#netflowGrap" + k),
+            chart = dom.highcharts();
+        dom.show();
+        chart.showLoading();
+
+        if (data.maxflow != undefined && data.maxflow != "" && data.maxflow != null) {
+            var desc = "最大进流量 : " + data.maxflow[k].max_in_rate + "(M)"
+                + " 最大进时间 : " + data.maxflow[k].max_in_rate_date
+                + " 最大出流量 : " + data.maxflow[k].max_out_rate + "(M)"
+                + " 最大出时间 : " + data.maxflow[k].max_out_rate_date;
+            chart.setTitle({ text: "机房:" + v }, {text: desc, style: {fontFamily: "Dosis, sans-serif", fontSize: '14px' }});
+        }else{
+            chart.setTitle({ text: "机房:" + v }, {text: "峰值数据未统计", style: {fontFamily: "Dosis, sans-serif", fontSize: '14px' }});
+        }
+
+        chart.series[0].setData(data.body[k].in_rate);
+
+        chart.series[1].setData(data.body[k].out_rate);
+
+        chart.xAxis[0].update({"tickInterval": parseInt(data.body[k].sampling_time.length / 8)});
+        chart.xAxis[0].setCategories(data.body[k].sampling_time);
+
+        chart.hideLoading();
+
+    }
+
+    var options = {
+        background2: '#F0F0EA',
+        colors: ["#7cb5ec", "#f7a35c", "#90ee7e", "#7798BF", "#aaeeee", "#ff0066", "#eeaaee",
+            "#55BF3B", "#DF5353", "#7798BF", "#aaeeee"],
+        chart: {
+            type: 'area',
+            backgroundColor: null,
+            style: {
+                fontFamily: "Dosis, sans-serif"
+            },
+            zoomType: 'x'
+        },
+
+        loading: {
+            hideDuration: 1000,
+            showDuration: 1000
+        },
+        title: {
+            style: {
+                fontSize: '16px',
+                fontWeight: 'bold',
+                textTransform: 'uppercase'
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        legend: {
+            enabled: true
+        },
+        lang: {
+            noData: "无数据"
+        },
+        noData: {
+            style: {
+                fontWeight: 'bold',
+                fontSize: '15px',
+                color: '#303030'
+            }
+        },
+        yAxis: {
+            title: {
+                enabled: false
+            },
+            lineWidth: 1,
+            lineColor: "#D8D8D8"
+        },
+        tooltip: {
+            enabled: true,
+            formatter: function () {
+                return "时间:" + this.x + "<br>数值:" + this.y + " (M)";
+            }
+        },
+        series: [
+            {
+                data: [],
+                name: "进流量"
+            },
+            {
+                data: [],
+                name: "出流量"
+            }
+        ],
+        xAxis: {
+            gridLineWidth: 1,
+            labels: {
+                style: {
+                    fontSize: '12px'
+                }
+            },
+            lineColor: "#D8D8D8",
+            categories: []
+        }
+    };
+
+    $("#netflowGrap0").highcharts(options);
+    $("#netflowGrap1").highcharts(options);
+    $("#netflowGrap2").highcharts(options);
+    $("#netflowGrap3").highcharts(options);
+
+    $("#getDatas").click();
+
+    if ($(".Roll_Content:first-child >li").length > 0) {
+        var roll_jQuery, contents;
+
+        roll_jQuery = $.roll('.Roll_Content', '#Roll_Container', { effect: 'scrollY', duration: 40, delay: 500 }).rollRun();
+        contents = $('.Roll_Content');
+
+        contents.bind('mouseenter', function () {
+            roll_jQuery.rollStop();
+        });
+        contents.bind('mouseleave', function () {
+            roll_jQuery.rollRun();
+        });
+    }
+
+})
+</script>

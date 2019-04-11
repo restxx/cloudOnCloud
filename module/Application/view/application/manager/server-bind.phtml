@@ -1,0 +1,58 @@
+<div class="manage-page-intro">
+    <h1><span class="glyphicon glyphicon-folder-open"></span>&nbsp;&nbsp;&nbsp;<?=
+        $this->layout()->firms[$this->layout()->fid]['name'] ?></h1>
+
+    <p>
+        <?= $this->layout()->firms[$this->layout()->fid]['desc'] ?>
+    </p>
+</div>
+<div class="container server-bind-from">
+    <form class="auth-form">
+        <?php
+        $authFormConfig = $this->layout()->firms[$this->layout()->fid]['authForm'];
+        if ($authFormConfig) {
+            foreach ($authFormConfig as $name => $label) {
+                ?>
+                <div class="form-group">
+                    <label for="<?= $name ?>"><?= $label ?></label>
+                    <input id="<?= $name ?>" name="<?= $name ?>" class="form-control" autocomplete="off" type="text"
+                           placeholder="<?= $label ?>">
+                </div>
+            <?php
+            }
+        } else {
+            ?>
+            <h3>配置尚未就绪</h3>
+        <?php } ?>
+        <button id="doBind" type="submit" class="btn btn-block btn-primary">绑定</button>
+    </form>
+</div>
+<script type="application/javascript">
+    $(function(){
+        $('.server-bind-from .auth-form').submit(function(){
+            window.showLoading();
+            $.post(
+                '/server-bind/<?= $this->layout()->fid?>',
+                $(this).serializeArray(),
+                function(ret) {
+                    window.hideLoading();
+                    if(ret.code == 0)
+                    {
+                        alert('绑定成功!');
+                        location.href='/control/<?=$this->layout()->fid?>'
+                    } else if(ret.code == 302){
+                        location.href = ret.url;
+                    } else {
+                        if(ret.error) {
+                            alert(ret.error);
+                        } else {
+                            alert('绑定失败，请联系管理员');
+                        }
+                    }
+                },
+                'json'
+            );
+            return false;
+        })
+    })
+</script>

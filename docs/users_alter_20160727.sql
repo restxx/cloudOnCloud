@@ -1,0 +1,1 @@
+ALTER TABLE `users` ADD COLUMN `bpassword` VARCHAR(60) NULL AFTER `password`;

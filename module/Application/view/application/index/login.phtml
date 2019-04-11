@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>登录 - 云上云</title>
+    <link rel="stylesheet" type="text/css" href="/towcloud/css/new/css.css">
+    <link rel="stylesheet" type="text/css" href="/towcloud/css/new/bootstrap.min.css">
+    <script src="/towcloud/js/jquery-1.12.1.min.js"></script>
+    <style>
+        .page{
+            width: 450px;
+            height: 400px;
+            background: rgba(44, 51, 61, 0.6);
+            position: absolute;
+            left:50%;
+            margin-left: -225px;
+            top : 200px;
+            overflow: hidden;
+            -moz-border-radius: 6px;
+            -webkit-border-radius: 6px;
+            border-radius: 6px;
+            padding: 60px;
+        }
+        form label {
+            color: #f5f5f5;
+        }
+        #register-captcha-image {
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body style="background: #1a0001 url(/towcloud/images/bg.jpg) no-repeat left top">
+<div class="top" style="background-color: #000000;">
+    <div class="w1000">
+        <h1 style="padding-top: 0px;margin-top: 10px;"><a href=""><img style="height:70px;" src="/towcloud/images/new/logo-3.png" alt="云上云"></a></h1>
+        <dl>
+            <dl>
+                <dt>
+                    <a href="/">首页</a>
+                    <a href="/submit-resource">加入云联盟</a>
+                    <a href="/manager">采购云资源</a>
+                    <a href="/resource">管理云资源</a>
+                    <a href="/about">关于我们</a>
+                </dt>
+
+                <dd>
+                    <a href="/login">登录</a>
+                    /
+                    <a href="/register">注册</a>
+                </dd>
+            </dl>
+
+        </dl>
+    </div>
+</div>
+<div class="content" style="display: none;">
+    <div class="page page-front">
+        <div class="page-content">
+            <form class="login">
+                <div class="form-group">
+                    <label for="username">用户名</label>
+                    <input type="text" class="form-control" id="username" maxlength="10" autocomplete="off" name="username" placeholder="用户名">
+                </div>
+                <div class="form-group">
+                    <label for="password">密码</label>
+                    <input type="password" class="form-control" maxlength="20" id="password" name="password" placeholder="密码">
+                </div>
+                <div class="form_element form-group">
+                    <div>
+                        <?php
+                        $captcha = $form->get('captcha');
+                        $formLabel = $this->plugin('formLabel');
+                        echo $formLabel->openTag() . $captcha->getOption('label');
+                        echo $formLabel->closeTag();
+                        ?>
+                    </div>
+                    <?php
+                    /** @var \Zend\Form\View\Helper\Captcha\Image $helper */
+                    $helper = $this->plugin($captcha->getCaptcha()->getHelperName());
+
+                    $helper->setCaptchaPosition(\Zend\Form\View\Helper\Captcha\AbstractWord::CAPTCHA_PREPEND);
+
+                    echo $helper($captcha);
+                    ?>
+                </div>
+                <?php echo $this->formElement($form->get('security')) ?>
+                <div class="row" align="center" style="margin-top: 40px;">
+                    <input type="hidden" name="login_way" value="sso">
+                    <button type="button" class="btn btn-success" name="sso" style="width: 45%;margin-right: 10px;">域登录</button>
+                    <button type="button" class="btn btn-primary" name="account" style="width: 45%">账密登录</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+<script>
+    $(function(){
+        setTimeout(function(){
+            $(".content").show("slow");
+        },200);
+
+        var $loginForm = $(".login");
+        $(".login :button").click(function(){
+            var login_way = $(this).attr("name");
+            $loginForm.find(":hidden[name=login_way]").val($(this).attr("name"));
+            var username = $loginForm.find('input[name=username]').val();
+            var password = $loginForm.find('input[name=password]').val();
+            if(!username) {
+                alert('用户名不能为空');
+                return false;
+            }
+            if(!password) {
+                alert('密码不能为空');
+                return false;
+            }
+            $.post(
+                'login-index',
+                $loginForm.serializeArray(),
+                function(ret) {
+                    if(ret.code == 0) {
+                        //alert('登录成功');
+                        location.href="/manager";
+                    } else {
+                        if(ret.error) {
+                            alert(ret.error);
+                            $("#register-captcha-image").click();
+                        } else {
+                            alert('登录失败');
+                        }
+                    }
+                },
+                'json'
+            );
+            return false;
+        });
+        $("#register-captcha-image").click(function(){
+            $.get(
+                '/refresh-captcha',
+                {},
+                function(ret){
+                    $("#register-captcha-image").attr('src','/images/captcha/' + ret.id + '.png');
+                    $('#register-captcha-hidden').val(ret.id);
+                },
+                'json'
+            )
+        });
+    });
+</script>
+</body>
+</html>

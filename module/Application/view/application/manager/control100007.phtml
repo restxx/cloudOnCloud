@@ -1,0 +1,475 @@
+<div class="manage-area-nav">
+    <h2><?= $this->layout()->firms[$this->layout()->fid]['name']?></h2>
+
+    <div class="list project"></div>
+    <div class="list region"></div>
+    <?php
+    if ($this->get('account')['puid'] == 0) {
+        ?>
+        <a class="unbind" href="javascript:void(0)">解除绑定</a>
+    <?php } ?>
+</div>
+<div class="toolbar-template" style="display: none;">
+    <button class="btn btn-default new-instance-create" onclick="alert('敬请期待')">创建</button>
+    <button class="btn btn-default table_refresh">刷新</button>
+    <button class="btn btn-forbidden btn-default instance-restart" disabled>重新启动</button>
+    <div class="dropdown instances_operations">
+        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown"
+                aria-haspopup="true" aria-expanded="true">
+            更多操作
+            <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+            <!--li class 禁止其他包含disabled的名称-->
+            <li class="disabled start" operation="start"><a href="javascript:void(0)">开机</a></li>
+            <li class="disabled stop" operation="stop"><a href="javascript:void(0)">关机</a></li>
+            <li class="stop" operation="addToJumpServer"><a href="javascript:void(0)">添加到堡垒机</a></li>
+            <!--<li class="disabled"><a href="javascript:alert('敬请期待')">加载密钥</a></li>
+            <li class="disabled"><a href="javascript:alert('敬请期待')">分配至项目</a></li>
+            <li class="disabled"><a href="javascript:alert('敬请期待')">改名</a></li>
+            <li class="disabled"><a href="javascript:alert('敬请期待')">调整网络</a></li>
+            <li class="disabled"><a href="javascript:alert('敬请期待')">销毁</a></li>
+            <li class="disabled"><a href="javascript:alert('敬请期待')">导出选中</a></li>
+            <li class="disabled"><a href="javascript:alert('敬请期待')">导出全部</a></li>-->
+        </ul>
+    </div>
+    <button class="btn btn-default table_export">导出Excel</button>
+</div>
+<div class="dataTable-container" style="width: 90%; margin: auto;">
+    <table id="hosts" class="display" cellspacing="0" width="100%">
+        <thead>
+        <tr>
+            <th>
+                <input type="checkbox" class="tablecheck checkall"/>
+            </th>
+            <th>ID/主机名</th>
+            <th>IP</th>
+            <th>状态</th>
+            <th>创建时间</th>
+            <th>更新时间</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tfoot>
+        <tr>
+            <th>
+                <input type="checkbox" class="tablecheck checkall"/>
+            </th>
+            <th>ID/主机名</th>
+            <th>IP</th>
+            <th>状态</th>
+            <th>创建时间</th>
+            <th>更新时间</th>
+            <th>操作</th>
+        </tr>
+        </tfoot>
+    </table>
+</div>
+<script>
+    $(function () {
+        $('.manage-area-nav .unbind').click(function(){
+            if(confirm("确认解除绑定?"))
+            {
+                $.post(
+                    '/server-unbind/<?=$this->layout()->fid?>',
+                    {},
+                    function(ret)
+                    {
+                        if(ret.code == 0)
+                        {
+                            alert('解绑成功');
+                            location.href='/server-bind/<?=$this->layout()->fid?>'
+                        } else {
+                            if(ret.error) {
+                                alert(ret.error);
+                            } else {
+                                alert('解绑失败');
+                            }
+                        }
+                    }
+                );
+            }
+        });
+        var projects = <?=json_encode($this->projects)?>;
+        var menus = [
+            {
+                name: '开机',
+                func: function (menu) {
+                    var id = menu.attr('data-value');
+                    confirmModal("确认开机?",function(){
+                        serverAction(id, 'start');
+                    });
+
+                }
+            },
+            {
+                name: '关机',
+                func: function (menu) {
+                    var id = menu.attr('data-value');
+                    confirmModal("确认关机?",function(){
+                        serverAction(id, 'stop');
+                    });
+                }
+            },
+            {
+                name: '重新启动',
+                func: function (menu) {
+                    var id = menu.attr('data-value');
+                    confirmModal("确认重启?",function(){
+                        serverAction(id, 'restart');
+                    });
+                }
+            },
+            {
+                name: '加入堡垒机',
+                func: function (menu) {
+                    var id = menu.attr('data-value');
+                    var ip = menu.attr('data-wanip');
+                    var name = menu.attr('data-name');
+                    initJumpServerModal([[id,ip,name]]);
+                }
+            },
+            {
+                name: '修改密码',
+                func: function (menu) {
+                    var id = menu.attr('data-value');
+                    window.confirmChangePass({id: id}, function (data) {
+                        //console.log(1111);
+                        serverAction(data.id, 'resetPassword', data.pass)
+                    });
+                }
+            },
+            {
+                name: '连接服务器',
+                func: function (menu) {
+                    var id = menu.attr('data-value');
+                    window.confirmModal("确认连接服务器?", function (data) {
+                        $.post(
+                            '/vnc-console',
+                            {
+                                id : id,
+                                pid : $('.project').attr('data-value'),
+                                rid : $('.region').attr('data-value'),
+                                fid : 100007
+                            },
+                            function(ret){
+                                if(ret.code == 0) {
+                                    //window.open(ret.data.url);
+                                    window.open(ret.data.url, id,"height=900,width=900,toolbar=no,menubar=no,scrollbars=no,resizable=no,location=no,status=no");
+                                } else if(ret.error){
+                                    alert(ret.error);
+                                }
+                            },
+                            'json'
+                        );
+                    });
+                }
+            },
+            {
+                name: '添加到蓝鲸',
+                func: function (menu) {
+                    var hostid = menu.attr('data-value');
+                    var wanip = menu.attr('data-wanip');
+                    var lanip = menu.attr('data-lanip');
+                    var name = menu.attr('data-name');
+                    showAddBWModal(
+                        {
+                            wanip : wanip,
+                            lanip : lanip
+                        },
+                        function(id){
+                            $.post(
+                                '/m/add-to-blue-whale/<?=$this->layout()->fid?>',
+                                {
+                                    wanip : wanip,
+                                    lanip : lanip,
+                                    appid : id,
+                                    hostid : hostid
+                                },
+                                function(ret) {
+                                    hideAddBWModal();
+                                    if(ret.code == 0)
+                                    {
+                                        alert('添加成功');
+                                    } else if (ret.error) {
+                                        alert(ret.error);
+                                    }
+                                },
+                                'json'
+                            );
+                        });
+                }
+            }
+        ];
+        var tableDataURL = "/server-list/" + '<?=$this->layout()->fid?>';
+        var table = $('#hosts').DataTable({
+            "dom": '<"toolbar">frtip',
+            "processing": true,
+            "serverSide": true,
+            'ordering': false,
+            searching: false,
+            scrollX: true,
+            //scrollY:300,
+            scrollCollapse: false,
+            searchDelay: 1000,
+            pageLength: 10,
+            fixedColumns: {
+                leftColumns: 0,
+                rightColumns: 1
+            },
+            "ajax": {
+                url: tableDataURL,
+                type: 'POST',
+                data:function(d){
+                    d.p = $('.project').attr('data-value');
+                    d.r = $('.region').attr('data-value');
+                }
+            },
+            "language": {
+                "url": "/DataTables-1.10.11/media/languages/chinese.json",
+                searchPlaceholder: '主机名或内网IP(IP,IP,IP...)'
+            },
+            'columns': [
+                {
+                    "sClass": "text-center",
+                    "data": 'unId',
+                    render: function (data, type, full, meta) {
+                        return '<p style="text-align: center;">' +
+                            '<input type="checkbox"  class="tablecheck checkchild" operation-status="' + full.operationStatus + '"  value="' + data + '" />' +
+                            '</p>';
+                    },
+                    "bSortable": false,
+                    "searchable": false
+                },
+                {
+                    'data': 'name',
+                    render: function (data, type, full, meta) {
+                        return '<p><a href="/detail/<?=$this->layout()->fid?>/' + full.unId + '/'+ full.rid +'">' + full.unId + '</a></p><p>' + data + '</p>';
+                    },
+                    bSortable: false
+                },
+                {
+                    'data': 'lanIp',
+                    render: function (data, type, full, meta) {
+                        return '<p>' + (data?data:'未提供') + '(内网)</p><p>' + full.wanIpSet + '(公网)</p>';
+                    },
+                    bSortable: false,
+                    "searchable": false
+                },
+                {
+                    "data": 'status',
+                    render: function (data, type, full, meta) {
+                        return '<span class="status" style="color:#06c290;" status-value=' + data + '>' + data + '</span>';
+                    },
+                    "searchable": false
+                },
+                {
+                    "data": 'create_at',
+                    bSortable: false,
+                    "searchable": false
+                },
+                {
+                    "data": 'update_at',
+                    bSortable: false,
+                    "searchable": false
+                },
+                /*            {
+                 "data": 'statusName',
+                 render: function (data, type, full, meta) {
+                 return '<span class="status" style="color:#06c290;" status-value=' + full.status + '>' + data + '</span>';
+                 },
+                 "searchable": false
+                 },*/
+                {
+                    "sClass": "text-center",
+                    "data": 'unId',
+                    render: function (data, type, full, meta) {
+                        /*'<a class="power-on"  data-value="' + data + '">开机</a> ' +
+                         '<a class="power-off"  data-value="' + data + '">关机</a> ' +*/
+                        return '<div class="operation" data-lanip="' + full.lanIp + '" data-wanip="' + full.wanIpSet + '" data-name="' + full.name + '" operation-status="' + full.operationStatus + '" data-value="' + data + '"><a>操作<span class="glyphicon glyphicon-menu-down"></span></a></div>';
+                    },
+                    "bSortable": false,
+                    "searchable": false
+                }
+            ],
+            drawCallback: function (settings) {
+                var api = this.api();
+                $(".tablecheck").prop('checked',false);
+                api.$(".checkchild").unbind().click(function () {
+                    changeBtnState()
+                });
+                $(".dataTable-container .toolbar").html($('.toolbar-template').html());
+                for (var i = 0; i < api.$('tr').length; i++) {
+                    var tr = $(api.$('tr')[i]);
+                    var opStatus = tr.find('td div.operation').attr('operation-status');
+                    var statusList = [];
+                    for (var j = 0; j < opStatus.length; j++) {
+                        statusList.push(parseInt(opStatus[j]));
+                    }
+                    tr.find(".operation").DropMenu(menus, statusList);
+                }
+                $(".dataTable-container .table_refresh").unbind().click(function () {
+                    reload();
+                });
+                $(".dataTable-container .instance-restart").unbind().click(function () {
+                    var checkeds = $(".checkchild:checked");
+                    var serverIdsArr = [];
+                    for (var i = 0; i < checkeds.length; i++) {
+                        serverIdsArr.push(checkeds[i].value);
+                    }
+                    var serverIds = serverIdsArr.join(',');
+                    if (confirm('确认重启?')) {
+                        serverAction(serverIds, 'restart');
+                    }
+                });
+                if (api.$('tr').length > 0) {
+                    $(".dataTable-container .table_export").removeClass('btn-forbidden').removeAttr('disabled');
+                } else {
+                    $(".dataTable-container .table_export").addClass('btn-forbidden').attr('disabled', true);
+                }
+                $(".dataTable-container .table_export").unbind().click(function(){
+                    confirmModal(
+                        '确认导出?',
+                        function(data){
+                            var p = $('.project').attr('data-value');
+                            var r = $('.region').attr('data-value');
+                            var searchInput = $('.dataTable-container input[type=search]');
+                            var s = '';
+                            if(searchInput.length > 0)
+                            {
+                                s = searchInput.val();
+                            }
+                            var url = '/get-excel/<?=$this->layout()->fid?>';
+                            //window.loading('show');
+
+                            $('#iframe-download').remove();
+                            var frame = $('<iframe>');
+                            frame.attr('id','iframe-download');
+                            frame.attr('src',url + '?p=' + p + '&r=' +r + '&s=' + s);
+                            frame.css('display','none');
+                            $('body').append(frame);
+                            alert('下载已经开始,请耐心等待,<code>不要重复操作</code>!');
+                        }
+                    );
+                });
+                $('.dataTable-container .instances_operations li').unbind().click(function(){
+                    var me = $(this);
+                    if(me.hasClass('disabled'))
+                    {
+                        return;
+                    }
+                    var action = me.attr('operation');
+                    if(action)
+                    {
+                        if(action == 'addToJumpServer')
+                        {
+                            var checkeds = $(".checkchild:checked");
+                            var data = [];
+                            for(var i=0; i < checkeds.length; i++){
+                                var operation = $(checkeds[i]).parent('p').parent('td').parent('tr').find('.operation');
+                                var id = operation.attr('data-value');
+                                var ip = operation.attr('data-wanip');
+                                var name = operation.attr('data-name');
+                                data.push([id,ip,name])
+                            }
+                            initJumpServerModal(data);
+                        } else if (confirm('确认' + operations[action] + '?')) {
+                            var checkeds = $(".checkchild:checked");
+                            var serverIdsArr = [];
+                            for (var i = 0; i < checkeds.length; i++) {
+                                serverIdsArr.push(checkeds[i].value);
+                            }
+                            var serverIds = serverIdsArr.join(',');
+                            serverAction(serverIds, action);
+                        }
+                    }
+                });
+            }
+        });
+        $('.project').DropDownList(
+            projects,
+            function (id, name) {
+                $('#hosts').dataTable().api().ajax.url(tableDataURL + '?p=' + id +'&r=' + $('.region').attr('data-value')).load();
+            }
+        );
+        $('.region').DropDownList(
+            <?=json_encode($regions)?>,
+            function (id, name) {
+                $('#hosts').dataTable().api().ajax.url(tableDataURL + '?p=' + $('.project').attr('data-value') +'&r=' + id).load();
+            }
+        );
+        $(".checkall").click(function () {
+            var check = $(this).prop("checked");
+            $(".checkchild").prop("checked", check);
+            $(".checkall").prop("checked", check);
+            changeBtnState()
+        });
+
+
+        function reload() {
+            $('#hosts').dataTable().api().ajax.reload(function (json) {
+            }, false);
+        }
+        var serverOperationURL = '/server-operation/' + '<?=$this->layout()->fid?>';
+        function serverAction(ids, operationType, pass) {
+            var pid = $('.project').attr('data-value');
+            var rid = $('.region').attr('data-value');
+            $.post(
+                serverOperationURL,
+                {
+                    serverIds: ids,
+                    action: operationType, //start|stop|restart
+                    pid: pid,
+                    rid: rid,
+                    password: pass
+                },
+                function (ret) {
+                    if (ret.code == 0) {
+                        alert('操作成功完成');
+                        ret.data && console.log(ret.data);
+                    } else {
+                        alert(ret.error);
+                    }
+                    reload();
+                },
+                'json'
+            )
+        }
+        var operations = {
+            start: '开机',
+            stop: '关机',
+            restart: '重启'
+        };
+        function changeBtnState() {
+            var opMenu = {
+                start: 0,
+                stop: 0,
+                restart: 0
+            };
+            var checked = $(".checkchild:checked");
+            for (var i = 0; i < checked.length; i++) {
+                var opStatus = $(checked[i]).attr('operation-status');
+                opMenu.start += parseInt(opStatus[0]);
+                opMenu.stop += parseInt(opStatus[1]);
+                opMenu.restart += parseInt(opStatus[2]);
+            }
+            if (!opMenu.restart) {
+                $(".toolbar .instance-restart").addClass('btn-forbidden').attr('disabled', true);
+            } else {
+                $(".toolbar .instance-restart").removeClass('btn-forbidden').removeAttr('disabled');
+            }
+
+            var dropMenu = $('.instances_operations');
+            if(opMenu.start) {
+                dropMenu.find('.start').removeClass('disabled');
+            } else {
+                dropMenu.find('.start').addClass('disabled');
+            }
+            if(opMenu.stop){
+                dropMenu.find('.stop').removeClass('disabled');
+            } else {
+                dropMenu.find('.stop').addClass('disabled');
+            }
+        }
+    })
+</script>

@@ -1,0 +1,1 @@
+ALTER TABLE `ping_log` ADD INDEX `create_time` (`create_time`);

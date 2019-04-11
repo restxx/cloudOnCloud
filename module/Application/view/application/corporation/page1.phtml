@@ -1,0 +1,164 @@
+<div class="manage-area-nav">
+    <h2><?= $this->layout()->menus[$this->layout()->id] ?></h2>
+
+    <div class="list project"></div>
+    <div class="list region"></div>
+    <!--<a class="unbind" href="javascript:void(0)">解除绑定</a>-->
+</div>
+
+<div class="cor-content alert alert-info">
+    创建项目组，用于子账号权限管理和金额分配
+</div>
+<br>
+<div class="cor-content">
+    <form class="create">
+        <div class="form-group">
+            <label for="pname">项目名</label>
+            <input type="text" class="form-control" id="pname" placeholder="请输入项目名" autocomplete="off">
+        </div>
+        <button type="button" class="btn btn-default" id="btnCreate">创建</button>
+    </form>
+
+    <div class="dataTable-container">
+        <table id="projectsList" class="display" cellspacing="0" width="100%">
+            <thead>
+            <tr>
+                <th>项目名/ID</th>
+                <th>创建者</th>
+                <th>映射项目ID</th>
+                <th>映射项目厂商</th>
+                <th>可用余额</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<script type="application/javascript">
+    $(function(){
+        var firmList = <?=json_encode($this->layout()->firmList)?>;
+        var tableDataURL = "/corp/get-projects";
+        var table = $('#projectsList').DataTable({
+            dom: '<"toolbar">frtip',
+            processing: true,
+            serverSide: true,
+            ordering: false,
+            searching: false,
+            scrollX: true,
+            //scrollY:300,
+            scrollCollapse: false,
+            searchDelay: 1000,
+            pageLength: 10,
+            fixedColumns: {
+                leftColumns: 0,
+                rightColumns: 1
+            },
+            ajax: {
+                url: tableDataURL,
+                type: 'POST',
+                data:function(d){/*
+                    d.p = $('.project').attr('data-value');
+                    d.r = $('.region').attr('data-value');*/
+                }
+            },
+            language: {
+                url: "/DataTables-1.10.11/media/languages/chinese.json",
+                //searchPlaceholder: '主机名或内网IP(IP,IP,IP...)'
+            },
+            columns: [
+                {
+                    data: 'name',
+                    render: function (data, type, full, meta) {
+                        return '<p>' + data + '</p><p>' + full.id + '</p>';
+                    },
+                    bSortable: false
+                },
+                {
+                    data: 'username',
+                    bSortable: false,
+                    searchable: false
+                },
+                {
+                    data: 'mname',
+                    searchable: false,
+                    render: function (data, type, full, meta) {
+                        return data || '-';
+                    }
+                },
+                {
+                    data: 'mfid',
+                    searchable: false,
+                    render: function (data, type, full, meta) {
+                        return (data && firmList[data]) || '-';
+                    }
+                },
+                {
+                    data: 'balance',
+                    bSortable: false,
+                    searchable: false
+                },
+                {
+                    sClass: "text-center",
+                    data: 'id',
+                    render: function (data, type, full, meta) {
+                        return '<a class="btnDel" href="javascript:void(0);" data-id="' + data + '" data-name="' + full.name + '">删除</a>';
+                    },
+                    bSortable: false,
+                    searchable: false
+                }
+            ],
+            drawCallback: function (settings) {
+                var api = this.api();
+                api.$('.btnDel').click(function(){
+                    var btn  = $(this);
+                    var id   = btn.attr('data-id');
+                    var name = btn.attr('data-name');
+                    window.confirmModal('确认删除项目 : <b>' + name +'</b> ?', function(){
+                        $.post(
+                            '/corp/del-project',
+                            {
+                                id : id
+                            },
+                            function (ret){
+                                if(ret.code == 0)
+                                {
+                                    alert('删除成功');
+                                    $('#projectsList').dataTable().api().ajax.reload(function (json) {}, false);
+                                } else if(ret.error) {
+                                    alert(ret.error);
+                                }
+                            },
+                            'json'
+                        );
+                    });
+                })
+            }
+        });
+        $('#btnCreate').click(function(){
+            var name = $('#pname').val();
+            if(!name) {
+                alert('请输入项目名');
+                return false;
+            }
+            $.post(
+                '/corp/new-project',
+                {
+                    name : name
+                },
+                function(ret){
+                    if(ret.code == 0)
+                    {
+                        alert('新建成功');
+                        $('#pname').val('');
+                        $('#projectsList').dataTable().api().ajax.reload(function (json) {}, false);
+                    } else if(ret.error)
+                    {
+                        alert(ret.error);
+                    }
+                },
+                'json'
+            );
+        });
+    })
+</script>

@@ -1,0 +1,68 @@
+<div class="manage-area-nav">
+    <h2><?= $this->layout()->menus[$this->layout()->id] ?></h2>
+
+    <div class="list project"></div>
+    <div class="list region"></div>
+    <!--<a class="unbind" href="javascript:void(0)">解除绑定</a>-->
+</div>
+<div class="cor-content alert alert-info">
+    需先关联<a href="/cor-index/4"><code>项目映射关系</code></a>才可分配项目余额。账户总余额是关联项目的服务器提供商平台中的余额，不会因分配变化。
+</div>
+<br>
+<div class="cor-content">
+    <form class="assign">
+        <div class="form-group">
+            <label for="pProject">项目组</label>
+            <select class="form-control" id="pProject">
+                <option value="0">选择项目...</option>
+                <?php
+                foreach($this->projects as $id => $name){
+                    ?>
+                    <option value="<?=$id?>"><?=$name?></option>
+                <?php
+                }
+                ?>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="pMoney">项目组可用余额</label>
+            <input type="number" class="form-control" id="pMoney" min="1">
+            <code>账户总余额:￥500000</code>
+        </div>
+        <button type="button" class="btn btn-default" id="btnAssign">分配</button>
+    </form>
+</div>
+
+<script type="application/javascript">
+    $(function(){
+        $("#btnAssign").click(function(){
+            var money = $("#pMoney").val();
+            var id = $('#pProject').val();
+            if(id == 0) {
+                alert('请选择项目');
+                return false;
+            }
+            if(money != parseInt(money))
+            {
+                alert('项目可用余额需填写整数');
+                return false;
+            }
+            $.post(
+                '/corp/set-balance',
+                {
+                    id : id,
+                    money : money
+                },
+                function(ret) {
+                    if(ret.code == 0)
+                    {
+                        alert('分配成功');
+                    } else if(ret.error) {
+                        alert(ret.error);
+                    }
+                }
+            );
+        });
+
+    });
+</script>

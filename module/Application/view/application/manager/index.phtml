@@ -1,0 +1,42 @@
+<div class="panel-container">
+    <div class="panel panel-warning">
+        <div class="panel-heading"><h4>我们的产品</h4></div>
+        <div class="panel-body">
+            <?php
+                foreach($this->firms as $id => $item){
+                    if($item['com'] != 'Giant') continue;
+            ?>
+                    <p><a href='/control/<?= $id?>'><?= $item['name']?></a></p>
+            <?php
+                }
+            ?>
+        </div>
+    </div>
+    <div class="panel panel-info">
+        <div class="panel-heading"><h4>第三方云产品</h4></div>
+        <div class="panel-body">
+            <?php
+            foreach($this->firms as $id => $item){
+                if($item['com'] == 'Giant') continue;
+                ?>
+                <p><a href='/control/<?= $id?>'><?= $item['name']?></a></p>
+            <?php
+            }
+            ?>
+        </div>
+    </div>
+
+    <div class="panel panel-success">
+        <div class="panel-heading"><h4>已绑定的厂商</h4></div>
+        <div class="panel-body">
+            <?php
+            foreach ($this->list as $id => $name) {
+                ?>
+                <p><a href='/control/<?= $id?>'><?= $name?></a></p>
+            <?php
+            }
+            ?>
+        </div>
+    </div>
+</div>
+

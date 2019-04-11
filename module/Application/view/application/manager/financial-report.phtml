@@ -1,0 +1,1213 @@
+<link rel="stylesheet" type="text/css" media="all" href="/css/jquery.dataTables.min.css"/>
+<link rel="stylesheet" type="text/css" media="all" href="/css/jquery.datatable.extend.css"/>
+<script src='/js/dataTables.tableTools.min.js' type="text/javascript" charset="utf-8"></script>
+<link href='/css/dataTables.tableTools.min.css' rel='stylesheet'>
+
+<div class="manage-area-detail-nav">
+    <a class="to-host-list left-nav" href="javascript:void(0);">
+        <span class="glyphicon glyphicon-chevron-left"></span>
+        财务报表-星云
+    </a>
+</div>
+
+<style type="text/css">
+    .lijun_tablist {
+        float: left;
+        line-height: 27px;
+        font-size: 12px;
+        margin-right: 4px;
+        opacity: 1;
+    }
+
+    .lijun_table {
+        display: table;
+        table-layout: fixed;
+        width: 100%;
+        margin-top: 50px;
+        margin-bottom: 26px;
+        border-bottom: 1px solid #E6EBF2;
+    }
+
+    .lijun_table_caption {
+        display: table-caption;
+        margin-bottom: 14px;
+    }
+
+    .lijun_chart_title {
+        font-size: 14px;
+    }
+
+    .lijun_select {
+        display: inline-block;
+        min-width: 30px;
+        height: 30px;
+        line-height: 30px;
+        padding: 4px 6px;
+        font-size: 12px;
+        color: #555;
+        vertical-align: middle;
+        -moz-border-radius: 4px;
+        border-radius: 4px;
+        border-color: rgb(169, 169, 169);
+    }
+
+
+</style>
+<div class="detail-tab">
+
+    <ul class="tab-list">
+        <li class="tab-title-cur"><a href="javascript:void(0)">基础报表</a></li>
+        <li><a href="javascript:void(0)">星云带宽</a></li>
+        <li><a href="javascript:void(0)">物理机带宽</a></li>
+        <li><a href="javascript:void(0)">项目管理</a></li>
+        <li><a href="javascript:void(0)">项目组管理</a></li>
+        <li><a href="javascript:void(0)">公共项目管理</a></li>
+    </ul>
+    <div class="tab-page tab-content-cur">
+        <div class="box col-md-12">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <div class="panel-title"><span style="font-size: 12px;">报表</span></div>
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <ul class="list-inline">
+                            <li>
+                                <input type="text" name="overseasCloudServerFee" class="form-control column_filter"
+                                       placeholder="海外云费用"
+                                       data-column="0">
+                            </li>
+                        </ul>
+                    </div>
+                    <div style="display: inline-block;padding: 5px">
+                        <div class="btn btn-primary btn-md" id="btnMakeFinancailReport"><i
+                                class="glyphicon glyphicon-import icon-white"></i> 生成数据
+                        </div>
+                    </div>
+                    <table class="table table-striped table-hover" style="width: 100%;"
+                           id="financialReportTable">
+                        <thead>
+                        <tr>
+                            <th>日期</th>
+                            <th>财务主体</th>
+                            <th>项目ID</th>
+                            <th>项目名称</th>
+                            <th>项目类型</th>
+                            <th>数量</th>
+                            <th>单价</th>
+                            <th>总价</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="tab-page">
+        <div class="box col-md-12">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <div class="panel-title"><span style="font-size: 12px;">星云带宽报表</span></div>
+                </div>
+                <div class="panel-body">
+                    <div class="DTTT_container">
+                        <a class="DTTT_button DTTT_button_xls" name="exportBandwidthReport" target="_blank">
+                            <span>Excel</span>
+                        </a>
+                    </div>
+                    <table class="table table-striped table-hover" style="width: 100%;"
+                           id="bandwidthTable">
+                        <thead>
+                        <tr>
+                            <th>日期</th>
+                            <th>项目ID</th>
+                            <th>项目名称</th>
+                            <th>机房</th>
+                            <th>带宽（M）</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="tab-page">
+        <div class="box col-md-12">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <div class="panel-title"><span style="font-size: 12px;">物理机带宽</span></div>
+                </div>
+                <div class="panel-body">
+                    <div class="DTTT_container">
+                        <a class="DTTT_button DTTT_button_xls" name="exportNetflowReport" target="_blank">
+                            <span>Excel</span>
+                        </a>
+                    </div>
+                    <div class="box-content">
+                        <div class="lijun_tablist">
+                            <form id="netflowForm">
+                                <div class="form-group">
+                                    <ul class="list-inline">
+                                        <li>
+                                            <select data-placeholder="--项目--" class="lijun_select" name="net_project">
+                                                <?php foreach ($projects as $project) { ?>
+                                                    <option value="<?= $project['alias'] ?>"><?= $project['alias'] . '-'
+                                                        . (isset($project['name']) ? $project['name'] : "") ?></option>
+                                                <?php } ?>
+                                            </select>
+                                        </li>
+                                        <li>
+                                            <select data-placeholder="--机房--" class="lijun_select" name="net_idc">
+                                                <?php foreach ($idcs as $idc) { ?>
+                                                    <option value="<?= $idc ?>"><?= $idc ?></option>
+                                                <?php } ?>
+                                            </select>
+                                        </li>
+                                        <li>
+                                            <select data-placeholder="--选择月份--" class="lijun_select" name="net_month">
+                                                <?php foreach ($months as $month) { ?>
+                                                    <option
+                                                        value="<?= $month['index'] ?>"><?= $month['month'] ?></option>
+                                                <?php } ?>
+                                            </select>
+                                        </li>
+                                        <li>
+                                            <a>
+                                                <div class="glyphicon glyphicon-search" style="cursor: pointer;"
+                                                     id="getNetflowGrap"></div>
+                                            </a>
+                                        </li>
+
+                                    </ul>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="box-content">
+                        <div class="lijun_table">
+                            <h3 class="lijun_table_caption">物理机</h3>
+
+                            <h4 class="lijun_chart_title">带宽监控 (单位 Mbit) </h4>
+                            <br>
+
+                            <div id="netflowGrap"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-page">
+        <div class="box col-md-12">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <div class="panel-title"><span style="font-size: 12px;">&nbsp项目列表</span></div>
+                </div>
+                <div class="panel-body">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a class="collapsed" data-toggle="collapse" data-parent="#accordion"
+                                   href="#collapseOne">
+                                    <span class="glyphicon glyphicon-search"></span> 过滤选项
+                                    <span class="pull-right glyphicon glyphicon-chevron-down arrow"></span>
+                                </a>
+                            </h4>
+                        </div>
+                        <div id="collapseOne" class="panel-collapse collapse">
+                            <div class="box-content">
+                                <div class="form-group">
+                                    <ul class="list-inline">
+                                        <li>
+                                            <input type="text" class="form-control column_filter" placeholder="过滤项目ID"
+                                                   data-column="0">
+                                        </li>
+                                        <li>
+                                            <input type="text" class="form-control column_filter" placeholder="过滤项目名称"
+                                                   data-column="1">
+                                        </li>
+                                        <li>
+                                            <select class="form-control column_filter" data-column="5">
+                                                <option value="">全部组</option>
+                                                <?php foreach ($groups as $group) { ?>
+                                                    <option value="<?= $group["group_id"] ?>"><?=
+                                                        $group["group_id"] . '-' . $group["name"] ?></option>
+                                                <?php } ?>
+                                            </select>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="btn btn-primary btn-md pull-right" id="btnAddProduct"><i
+                            class="glyphicon glyphicon-import icon-white"></i> 新增
+                    </div>
+                    <table class="table table-striped table-hover" style="width: 100%;" id="financialProductTable">
+                        <thead>
+                        <tr>
+                            <th>项目ID</th>
+                            <th>项目名称</th>
+                            <th>类型</th>
+                            <th>别名</th>
+                            <th>所属组</th>
+                            <th>描述</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-page">
+        <div class="box col-md-12">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <div class="panel-title"><span style="font-size: 12px;">&nbsp项目组列表</span></div>
+                </div>
+                <div class="panel-body">
+                    <div class="btn btn-primary btn-md pull-right" id="btnAddProductGroup"><i
+                            class="glyphicon glyphicon-import icon-white"></i> 新增
+                    </div>
+                    <table class="table table-striped table-hover" style="width: 100%;" id="financialProductGroupTable">
+                        <thead>
+                        <tr>
+                            <th>组ID</th>
+                            <th>组名</th>
+                            <th>描述</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="tab-page">
+        <div class="box col-md-12">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <div class="panel-title"><span style="font-size: 12px;">&nbsp手游,公共项目分摊管理</span></div>
+                </div>
+                <div class="panel-body">
+                    <div class="btn btn-primary btn-md pull-right" id="btnAddPublicGroup"><i
+                            class="glyphicon glyphicon-import icon-white"></i> 新增
+                    </div>
+                    <table class="table table-striped table-hover" style="width: 100%;" id="financialPublicGroupTable">
+                        <thead>
+                        <tr>
+                            <th>公共项目ID</th>
+                            <th>公共项目名</th>
+                            <th>项目ID</th>
+                            <th>项目名称</th>
+                            <th>占比</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modal_addFinancialProduct" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">添加项目</h3>
+            </div>
+            <div class="panel-body">
+                <form id="form_addFinancialProduct">
+                    <div class="form-group">
+                        <label for="product_id">项目ID：</label>
+                        <input type="text" name="product_id" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="name">项目名称：</label>
+                        <input type="text" name="name" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="type">项目类型：</label>
+                        <input type="email" name="type" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="alias">别名：</label>
+                        <input type="text" name="alias" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="desc">项目描述：</label>
+                        <input type="text" name="desc" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="group_id">项目组：</label>
+                        <select name="group_id"
+                                style="width: 100%;height: 34px;border-radius : 4px;border: 1px solid #ccc;">
+                            <?php foreach ($groups as $group) { ?>
+                                <option value="<?= $group["group_id"] ?>"><?=
+                                    $group["group_id"] . '-' . $group["name"] ?></option>
+                            <?php } ?>
+                        </select>
+                    </div>
+
+                    <div class="pull-right">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-primary" id="btnAddFinancialProduct">提交</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+<div class="modal fade" id="modal_editFinancialProduct" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">编辑项目</h3>
+            </div>
+            <div class="panel-body">
+                <form id="form_editFinancialProduct">
+                    <div class="form-group">
+                        <label for="product_id">项目ID：</label>
+                        <input type="text" name="product_id" class="form-control" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="name">项目名称：</label>
+                        <input type="text" name="name" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="type">项目类型：</label>
+                        <input type="email" name="type" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="alias">别名：</label>
+                        <input type="text" name="alias" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="desc">项目描述：</label>
+                        <input type="text" name="desc" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="group_id">项目组：</label>
+                        <select name="group_id"
+                                style="width: 100%;height: 34px;border-radius : 4px;border: 1px solid #ccc;">
+                            <?php foreach ($groups as $group) { ?>
+                                <option value="<?= $group["group_id"] ?>"><?=
+                                    $group["group_id"] . '-' . $group["name"] ?></option>
+                            <?php } ?>
+                        </select>
+                    </div>
+
+                    <div class="pull-right">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-primary" id="btnEditFinancialProduct">提交</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+<div class="modal fade" id="modal_addFinancialProductGroup" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">添加项目组</h3>
+            </div>
+            <div class="panel-body">
+                <form id="form_addFinancialProductGroup">
+                    <div class="form-group">
+                        <label for="name">项目组名称：</label>
+                        <input type="text" name="name" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="desc">描述：</label>
+                        <input type="text" name="desc" class="form-control">
+                    </div>
+
+                    <div class="pull-right">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-primary" id="btnAddFinancialProductGroup">提交</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+<div class="modal fade" id="modal_editFinancialProductGroup" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">编辑项目组</h3>
+            </div>
+            <div class="panel-body">
+                <form id="form_editFinancialProductGroup">
+                    <div class="form-group">
+                        <label for="group_id">组ID：</label>
+                        <input type="text" name="group_id" class="form-control" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="name">组名称：</label>
+                        <input type="text" name="name" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="desc">组描述：</label>
+                        <input type="text" name="desc" class="form-control">
+                    </div>
+                    <div class="pull-right">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-primary" id="btnEditFinancialProductGroup">提交</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+<div class="modal fade" id="modal_editFinancialProductGroupPrices" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+
+        <div class="panel panel-primary" style="height: 50%;overflow: hidden;overflow-y: inherit;">
+            <div class="panel-heading">
+                <h3 class="panel-title">编辑项目组价格模板</h3>
+            </div>
+            <div class="panel-body">
+                <form id="form_editFinancialProductGroupPrices">
+                    <div class="form-group">
+                        <label for="group_id">组ID：</label>
+                        <input type="text" name="group_id" class="form-control" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="jgf">机柜费：</label>
+                        <input type="text" name="jgf" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="zhfwcb">物理机综合服务成本：</label>
+                        <input type="text" name="zhfwcb" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="syshbgp">手游带宽(上海BGP)：</label>
+                        <input type="text" name="syshbgp" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="sybjbgp">手游带宽(北京BGP)：</label>
+                        <input type="text" name="sybjbgp" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="sysh">手游带宽(上海)：</label>
+                        <input type="text" name="sysh" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="sybj">手游带宽(北京)：</label>
+                        <input type="text" name="sybj" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="sytj">手游带宽(天津)：</label>
+                        <input type="text" name="sytj" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="syltsh">联通(上海)：</label>
+                        <input type="text" name="syltsh" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="syltbj">联通(北京)：</label>
+                        <input type="text" name="syltbj" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="sylttj">联通(天津)：</label>
+                        <input type="text" name="sylttj" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="cdn">CDN费用：</label>
+                        <input type="text" name="cdn" class="form-control">
+                    </div>
+                    <div class="pull-right">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-primary" id="btnEditFinancialProductGroupPrices">提交
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+<div class="modal fade" id="modal_addFinancialPublicGroup" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">添加项目组</h3>
+            </div>
+            <div class="panel-body">
+                <form id="form_addFinancialPublicGroup">
+                    <div class="form-group">
+                        <label for="product_id">公共项目ID：</label>
+                        <input type="text" name="product_id" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="product_id2">项目ID：</label>
+                        <input type="text" name="product_id2" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="percent">占比：</label>
+                        <input type="text" name="percent" class="form-control">
+                    </div>
+                    <div class="pull-right">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-primary" id="btnAddFinancialPublicGroup">提交</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+<div class="modal fade" id="modal_editFinancialPublicGroup" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">编辑项目组</h3>
+            </div>
+            <div class="panel-body">
+                <form id="form_editFinancialPublicGroup">
+                    <div class="form-group">
+                        <label for="product_id">公共项目ID：</label>
+                        <input type="text" name="product_id" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="product_id2">项目ID：</label>
+                        <input type="text" name="product_id2" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="percent">占比：</label>
+                        <input type="text" name="percent" class="form-control">
+                    </div>
+                    <div class="pull-right">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-primary" id="btnEditFinancialPublicGroup">提交</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style type="text/css">
+    .lijun_btn {
+        margin-left: 10px;
+    }
+
+</style>
+
+<script>
+    $(function () {
+
+        window.onresize = function () {
+            $("#netflowGrap").width($(".tab-content-cur").width() - 80 + "px");
+        };
+        window.onresize();
+
+        $("[name=exportNetflowReport").on("click", function (e) {
+            e.preventDefault();
+
+            window.location.href = "/export-netflow-report/" + $("[name=net_month]").val();
+
+        });
+
+        $("[name=exportBandwidthReport").on("click", function (e) {
+            e.preventDefault();
+
+            window.location.href = "/export-bandwidth-report";
+
+        });
+
+        $('.detail-tab .tab-list li').click(function () {
+            $('.detail-tab .tab-list li').removeClass('tab-title-cur');
+            var me = $(this);
+            me.addClass('tab-title-cur');
+            $('.detail-tab .tab-page').removeClass('tab-content-cur');
+            var index = me.index();
+
+            $('.detail-tab .tab-page:eq(' + index + ')').addClass('tab-content-cur');
+        });
+
+        var overseasCloudServerFee;
+
+        $("#btnMakeFinancailReport").on("click", function () {
+
+            overseasCloudServerFee = $("[name=overseasCloudServerFee]").val();
+
+            if (!overseasCloudServerFee || isNaN(overseasCloudServerFee) || overseasCloudServerFee < 0) {
+                alert("海外云费用填写异常");
+                return false;
+            }
+
+            var tableDom = $("#financialReportTable"),
+                options = {
+                    bFilter: true,
+                    bSearchable: false,
+                    bSort: false,
+                    bProcessing: false,
+                    sDom: 'T<"clear">rt',
+                    "tableTools": {
+                        "aButtons": [
+                            {
+                                sExtends: "xls", sFileName: "financial.csv"
+                            }
+                        ],
+                        "charset": "utf-8"
+                    },
+                    sAjaxSource: "<?=$this->url("get-scloud-report")?>",
+                    fnServerData: function (sSource, aoData, fnCallback) {
+                        aoData.push({name: "overseasCloudServerFee", value: overseasCloudServerFee});
+
+                        $.ajax({
+                            url: sSource,
+                            data: aoData,
+                            type: 'post',
+                            async: false,
+                            success: function (result) {
+                                if (result.code == 1) {
+                                    fnCallback({aaData: result.data});
+                                } else {
+                                    alert(result.msg);
+                                    return false;
+                                }
+                            },
+                            error: function (msg) {
+                                alert(msg);
+                            }
+                        });
+                    },
+                    aoColumns: [
+                        {data: 'date', bSortable: false},
+                        {data: 'title', bSortable: false},
+                        {data: 'product_id', bSortable: false},
+                        {data: 'name', bSortable: false},
+                        {data: 'type', bSortable: false},
+                        {data: 'quantity', bSortable: false},
+                        {data: 'price', bSortable: false},
+                        {data: 'total', bSortable: false}
+                    ],
+                    aoColumnDefs: [
+                        {
+                            sDefaultContent: '',
+                            aTargets: ['_all']
+                        }
+                    ]
+                };
+
+            if (Ui.table.instance[tableDom.selector] == undefined) {
+                Ui.table.init(tableDom, options);
+            } else {
+                var datatable = Ui.table.instance[tableDom.selector];
+
+                overseasCloudServerFee = $("[name=overseasCloudServerFee]").val();
+
+                datatable.fnFilter();
+            }
+        });
+
+        var options = {
+            sAjaxSource: "<?=$this->url("financial-report", ["type" => 1])?>",
+            aoColumns: [
+                {data: 'product_id'},
+                {data: 'name', bSortable: false},
+                {data: 'type', bSortable: false},
+                {data: 'alias', bSortable: false},
+                {data: 'group_name'},
+                {data: 'desc', bSortable: false},
+                {
+                    sWidth: '15%',
+                    "mDataProp": "opt",
+                    "render": function (data, type, row) {
+                        var str = '<button type="button" class="btn btn-info btn-sm lijun_btn btnEditProduct">'
+                            + '<i class="glyphicon glyphicon-edit icon-white"></i> 编辑</button>'
+                            + '<button type="button" class="btn btn-warning btn-sm  lijun_btn btnDelProduct">'
+                            + '<i class="glyphicon glyphicon-floppy-disk icon-white"></i> 删除</button>';
+                        return str;
+                    },
+                    "bSortable": false,
+                    "bSearchable": false
+                }
+            ],
+            aoColumnDefs: [
+                {
+                    sDefaultContent: '',
+                    aTargets: ['_all']
+                }
+            ],
+            fnDrawCallback: function () {
+
+                $("#btnAddProduct").on("click", function () {
+                    var dom = $("#modal_addFinancialProduct"),
+                        form = $("#form_addFinancialProduct");
+
+                    form[0].reset();
+
+                    dom.modal({
+                        backdrop: false,
+                        keyboard: false
+                    }).on('shown.bs.modal', function () {
+                        $("#btnAddFinancialProduct").unbind().on("click", function () {
+                            $.post("<?=$this->url("add-financial-product")?>", form.serialize(), function (ret) {
+                                alert(ret.msg);
+                                if (ret.code == 0) {
+                                    dom.modal("hide");
+                                    Ui.table.instance[$("#financialProductTable").selector].fnFilter();
+                                }
+                            });
+
+                            return false;
+                        })
+                    });
+
+                    return false;
+                });
+
+                $(".btnEditProduct").on("click", function () {
+                    var dom = $("#modal_editFinancialProduct"),
+                        id = $(this).closest("tr").find("td:first-child").text(),
+                        form = $("#form_editFinancialProduct");
+
+                    form[0].reset();
+
+                    $.get("/get-financial-product/" + id, function (ret) {
+                        if (ret.code == 0) {
+                            dom.find("[name=product_id]").val(ret.data.product_id);
+                            dom.find("[name=name]").val(ret.data.name);
+                            dom.find("[name=type]").val(ret.data.type);
+                            dom.find("[name=desc]").val(ret.data.desc);
+                            dom.find("[name=group_id]").val(ret.data.group_id);
+                            dom.find("[name=alias]").val(ret.data.alias);
+
+                            dom.modal({
+                                backdrop: false,
+                                keyboard: false
+                            }).on('shown.bs.modal', function () {
+                                $("#btnEditFinancialProduct").unbind().on("click", function () {
+                                    $.post("<?=$this->url(
+                                            "edit-financial-product"
+                                        )?>", form.serialize(), function (ret) {
+                                            alert(ret.msg);
+                                            if (ret.code == 0) {
+                                                dom.modal("hide");
+                                                Ui.table.instance[$("#financialProductTable").selector].fnFilter();
+                                            }
+                                        }
+                                    );
+
+                                    return false;
+                                })
+                            });
+                        }
+                    });
+
+                    return false;
+                });
+
+                $(".btnDelProduct").on("click", function () {
+                    var id = $(this).closest("tr").find("td:first-child").text();
+
+                    confirmModal("确实要删除此项目信息吗?", function () {
+                        $.get("/del-financial-product/" + id, function (ret) {
+                            alert(ret.msg);
+                            if (ret.code == 0) {
+                                Ui.table.instance[$("#financialProductTable").selector].fnFilter();
+                            }
+                        });
+                    });
+
+                    return false;
+                });
+            }
+        };
+
+        Ui.table.init($("#financialProductTable"), options);
+
+        options = {
+            sAjaxSource: "<?=$this->url("financial-report", ["type" => 2])?>",
+            aoColumns: [
+                {sWidth: '8%', data: 'group_id'},
+                {sWidth: '10%', data: 'name', bSortable: false},
+                {sWidth: '20%', data: 'desc'},
+                {
+                    sWidth: '10%',
+                    "mDataProp": "opt",
+                    "render": function (data, type, row) {
+                        var str = '<button type="button" class="btn btn-info btn-sm lijun_btn btnEditProductGroup">'
+                            + '<i class="glyphicon glyphicon-edit icon-white"></i> 编辑</button>'
+                            + '<button type="button" class="btn btn-warning btn-sm lijun_btn btnDelProductGroup">'
+                            + '<i class="glyphicon glyphicon-floppy-disk icon-white"></i> 删除</button>'
+                            + '<button type="button" class="btn btn-success btn-sm lijun_btn btnEditProductGroupPrices">'
+                            + '<i class="glyphicon glyphicon-home icon-white"></i> 编辑单项价格</button>';
+                        return str;
+                    },
+                    "bSortable": false,
+                    "bSearchable": false
+                }
+            ],
+            aoColumnDefs: [
+                {
+                    sDefaultContent: '',
+                    aTargets: ['_all']
+                }
+            ],
+            fnDrawCallback: function () {
+
+                $("#btnAddProductGroup").on("click", function () {
+
+                    var dom = $("#modal_addFinancialProductGroup"),
+                        form = $("#form_addFinancialProductGroup");
+
+                    form[0].reset();
+
+                    dom.modal({
+                        backdrop: false,
+                        keyboard: false
+                    }).on('shown.bs.modal', function () {
+                        $("#btnAddFinancialProductGroup").unbind().on("click", function () {
+                            $.post("<?=$this->url("add-financial-product-group")?>", form.serialize(), function (ret) {
+                                alert(ret.msg);
+                                if (ret.code == 0) {
+                                    dom.modal("hide");
+                                    Ui.table.instance[$("#financialProductGroupTable").selector].fnFilter();
+                                }
+                            });
+
+                            return false;
+                        })
+                    });
+
+                    return false;
+                });
+
+                $(".btnEditProductGroupPrices").on("click", function () {
+
+                    var dom = $("#modal_editFinancialProductGroupPrices"),
+                        id = $(this).closest("tr").find("td:first-child").text(),
+                        form = $("#form_editFinancialProductGroupPrices");
+
+                    form[0].reset();
+
+                    $.get("/get-financial-product-group-prices/" + id, function (ret) {
+                        if (ret.code == 0) {
+
+                            dom.find("[name=group_id]").val(ret.data.group_id);
+                            dom.find("[name=jgf]").val(ret.data.jgf);
+                            dom.find("[name=zhfwcb]").val(ret.data.zhfwcb);
+                            dom.find("[name=syshbgp]").val(ret.data.syshbgp);
+                            dom.find("[name=sybjbgp]").val(ret.data.sybjbgp);
+                            dom.find("[name=sysh]").val(ret.data.sysh);
+                            dom.find("[name=sybj]").val(ret.data.sybj);
+                            dom.find("[name=sytj]").val(ret.data.sytj);
+                            dom.find("[name=syltsh]").val(ret.data.syltsh);
+                            dom.find("[name=syltbj]").val(ret.data.syltbj);
+                            dom.find("[name=sylttj]").val(ret.data.sylttj);
+                            dom.find("[name=cdn]").val(ret.data.cdn);
+                        }
+
+                        dom.modal({
+                            backdrop: false,
+                            keyboard: false
+                        }).on('shown.bs.modal', function () {
+                            $("#btnEditFinancialProductGroupPrices").unbind().on("click", function () {
+                                $.post("<?=$this->url(
+                                    "edit-financial-product-group-prices"
+                                )?>", form.serialize(), function (ret) {
+                                    alert(ret.msg);
+                                    if (ret.code == 0) {
+                                        dom.modal("hide");
+                                    }
+                                });
+
+                                return false;
+                            })
+                        });
+                    });
+
+                    return false;
+                });
+
+                $(".btnEditProductGroup").on("click", function () {
+                    var dom = $("#modal_editFinancialProductGroup"),
+                        id = $(this).closest("tr").find("td:first-child").text(),
+                        form = $("#form_editFinancialProductGroup");
+
+                    form[0].reset();
+
+                    $.get("/get-financial-product-group/" + id, function (ret) {
+                        if (ret.code == 0) {
+                            dom.find("[name=group_id]").val(ret.data.group_id);
+                            dom.find("[name=name]").val(ret.data.name);
+                            dom.find("[name=desc]").val(ret.data.desc);
+
+                            dom.modal({
+                                backdrop: false,
+                                keyboard: false
+                            }).on('shown.bs.modal', function () {
+                                $("#btnEditFinancialProductGroup").unbind().on("click", function () {
+                                    $.post("<?=$this->url(
+                                        "edit-financial-product-group"
+                                    )?>", form.serialize(), function (ret) {
+                                        alert(ret.msg);
+                                        if (ret.code == 0) {
+                                            dom.modal("hide");
+                                            Ui.table.instance[$("#financialProductGroupTable").selector].fnFilter();
+                                        }
+                                    });
+
+                                    return false;
+                                })
+                            });
+                        }
+                    });
+
+                    return false;
+                });
+
+                $(".btnDelProductGroup").on("click", function () {
+                    var id = $(this).closest("tr").find("td:first-child").text();
+
+                    confirmModal("确实要删除此项目组信息吗?", function () {
+                        $.post("/del-financial-product-group/" + id, function (ret) {
+                            if (ret.code == 0) {
+                                Ui.table.instance[$("#financialProductGroupTable").selector].fnFilter();
+                            }
+                        });
+                    });
+
+                    return false;
+                });
+            }
+        };
+
+        Ui.table.init($("#financialProductGroupTable"), options);
+
+        options = {
+            sAjaxSource: "<?=$this->url("financial-report", ["type" => 3])?>",
+            aoColumns: [
+                {sWidth: '8%', data: 'product_id'},
+                {sWidth: '8%', data: 'name', bSortable: false},
+                {sWidth: '10%', data: 'product_id2'},
+                {sWidth: '10%', data: 'name2', bSortable: false},
+                {sWidth: '20%', data: 'percent'},
+                {
+                    sWidth: '10%',
+                    "mDataProp": "opt",
+                    "render": function (data, type, row) {
+                        var str = '<button type="button" class="btn btn-info btn-sm lijun_btn btnEditPublicGroup">'
+                            + '<i class="glyphicon glyphicon-edit icon-white"></i> 编辑</button>'
+                            + '<button type="button" class="btn btn-warning btn-sm lijun_btn btnDelPublicGroup">'
+                            + '<i class="glyphicon glyphicon-floppy-disk icon-white"></i> 删除</button>';
+                        return str;
+                    },
+                    "bSortable": false,
+                    "bSearchable": false
+                }
+            ],
+            aoColumnDefs: [
+                {
+                    sDefaultContent: '',
+                    aTargets: ['_all']
+                }
+            ],
+            fnDrawCallback: function () {
+                $("#btnAddPublicGroup").on("click", function () {
+                    var dom = $("#modal_addFinancialPublicGroup"),
+                        form = $("#form_addFinancialPublicGroup");
+
+                    form[0].reset();
+
+                    dom.modal({
+                        backdrop: false,
+                        keyboard: false
+                    }).on('shown.bs.modal', function () {
+                        $("#btnAddFinancialPublicGroup").unbind().on("click", function () {
+                            $.post("<?=$this->url("add-financial-public-group")?>", form.serialize(), function (ret) {
+                                alert(ret.msg);
+                                if (ret.code == 0) {
+                                    dom.modal("hide");
+                                    Ui.table.instance[$("#financialPublicGroupTable").selector].fnFilter();
+                                }
+                            });
+
+                            return false;
+                        })
+                    });
+
+                    return false;
+                });
+
+                $(".btnEditPublicGroup").on("click", function () {
+                    var dom = $("#modal_editFinancialPublicGroup"),
+                        pid = $(this).closest("tr").find("td:first-child").text(),
+                        pid2 = $(this).closest("tr").find("td:eq(2)").text(),
+                        form = $("#form_editFinancialPublicGroup");
+
+                    form[0].reset();
+
+                    $.get("/get-financial-public-group/" + pid + "/" + pid2, function (ret) {
+                        if (ret.code == 0) {
+                            dom.find("[name=product_id]").val(ret.data.product_id);
+                            dom.find("[name=product_id2]").val(ret.data.product_id2);
+                            dom.find("[name=percent]").val(ret.data.percent);
+
+                            dom.modal({
+                                backdrop: false,
+                                keyboard: false
+                            }).on('shown.bs.modal', function () {
+                                $("#btnEditFinancialPublicGroup").unbind().on("click", function () {
+                                    var prams = form.serialize() + "&old_product_id=" + pid + "&old_product_id2=" + pid2;
+                                    $.post("<?=$this->url("edit-financial-public-group")?>", prams, function (ret) {
+                                        alert(ret.msg);
+                                        if (ret.code == 0) {
+                                            dom.modal("hide");
+                                            Ui.table.instance[$("#financialPublicGroupTable").selector].fnFilter();
+                                        }
+                                    });
+
+                                    return false;
+                                })
+                            });
+                        }
+                    });
+
+                    return false;
+                });
+
+                $(".btnDelPublicGroup").on("click", function () {
+                    var pid = $(this).closest("tr").find("td:first-child").text(),
+                        pid2 = $(this).closest("tr").find("td:eq(2)").text();
+
+                    confirmModal("确实要删除此公共项目信息吗?", function () {
+                        $.post("/del-financial-public-group/" + pid + "/" + pid2, function (ret) {
+                            alert(ret.msg);
+                            if (ret.code == 0) {
+                                Ui.table.instance[$("#financialPublicGroupTable").selector].fnFilter();
+                            }
+                        });
+                    });
+
+                    return false;
+                });
+            }
+        };
+
+        Ui.table.init($("#financialPublicGroupTable"), options);
+
+        options = {
+            sAjaxSource: "<?=$this->url("get-bandwidth-report")?>",
+            "aaSorting": [
+                [0, 'desc']
+            ],
+            aoColumns: [
+                {data: 'date', bSortable: true},
+                {data: 'product_id', bSortable: false},
+                {data: 'name', bSortable: false},
+                {data: 'idc', bSortable: false},
+                {data: 'bandwidth', bSortable: false}
+            ],
+            aoColumnDefs: [
+                {
+                    sDefaultContent: '',
+                    aTargets: ['_all']
+                }
+            ]
+        };
+
+        Ui.table.init($("#bandwidthTable"), options);
+
+        options = {
+            background2: '#F0F0EA',
+            colors: ["#7cb5ec", "#f7a35c", "#90ee7e", "#7798BF", "#aaeeee", "#ff0066", "#eeaaee",
+                "#55BF3B", "#DF5353", "#7798BF", "#aaeeee"],
+            chart: {
+                type: 'area'
+
+            },
+            loading: {
+                hideDuration: 1000,
+                showDuration: 1000
+            },
+            title: {
+                text: ''
+            },
+            credits: {
+                enabled: false
+            },
+            legend: {
+                enabled: false
+            },
+            yAxis: {
+                title: {
+                    enabled: false
+                },
+                lineWidth: 1,
+                lineColor: "#D8D8D8"
+            },
+            tooltip: {
+                enabled: true,
+                formatter: function () {
+                    return "时间:" + this.x + "<br>数值:" + this.y + " (Mbit)";
+                }
+            },
+            series: [
+                {
+                    data: [],
+                    color: '#FF7A22'
+                }
+            ],
+            xAxis: {
+                lineColor: "#D8D8D8",
+                categories: []
+            }
+        };
+
+        $("#netflowGrap").highcharts(options);
+
+        $("#getNetflowGrap").on("click", function () {
+
+            var chart = $("#netflowGrap").highcharts();
+            chart.showLoading();
+            $.post("<?=$this->url("get-netflow-grap")?>", $("#netflowForm").serialize(), function (data) {
+                if (data.code == 0) {
+
+                    var desc = "最大流量 : " + data.max_in + "(Mbit)"
+                        + " 最大流量时间 : " + data.max_in_date;
+
+                    chart.setTitle({}, {text: desc, style: {fontFamily: "Dosis, sans-serif", fontSize: '14px'}});
+                    chart.series[0].setData(data.points);
+                    chart.xAxis[0].update({"tickInterval": parseInt(data.categories.length / 8)});
+                    chart.xAxis[0].setCategories(data.categories);
+
+                } else {
+                    alert(data.msg);
+                }
+                chart.hideLoading();
+            });
+        });
+
+    });
+</script>

@@ -1,0 +1,313 @@
+<?php
+/**
+ * User: zhoubin
+ * Date: 2017/5/22
+ * Time: 11:49
+ */
+?>
+
+<script type="text/javascript" src="/js/jquery.datetimepicker.full.min.js"></script>
+<link rel="stylesheet" type="text/css" media="all" href="/css/jquery.datetimepicker.css"/>
+
+<style type="text/css">
+    .detail-tab .tab-page{
+        border-top:none;
+    }
+</style>
+<div class="detail-tab">
+
+
+    <div class="tab-page tab-content-cur">
+        <div class="box col-md-12">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <div class="panel-title"><span style="font-size: 12px;">各省ping值走势图</span></div>
+                </div>
+                <div class="panel-body">
+                    <div class="box-content">
+                        <div id="sec_chart" style="max-width:95%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="tab-page tab-content-cur">
+        <div class="box col-md-12">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <div class="panel-title"><span style="font-size: 12px;">省市筛选</span></div>
+                </div>
+                <div class="panel-body">
+                    <div class="box-content">
+                        <form class="form-horizontal" id="searchForm">
+                            <div class="form-group">
+                                <label for="inputEmail3" class="col-sm-1 control-label">省市</label>
+                                <div class="col-sm-10">
+                                    <?php foreach ($provinceGroup as $value): ?>
+                                        <label class="checkbox-inline" style="margin-left: 10px;">
+                                            <input name="province[]" class="province" type="checkbox" value="<?php echo $value['province'] ?>" <?php echo ($value['checked'] == 1) ? 'checked="checked"' : ''; ?> > <?php echo $value['province'] ?>
+                                        </label>
+                                    <?php endforeach;?>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="tab-page tab-content-cur">
+        <div class="box col-md-12">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <div class="panel-title"><span style="font-size: 12px;">历史ping值走势图</span></div>
+                </div>
+                <div class="panel-body">
+                    <div class="box-content">
+                        <div>时间区间:<input name="startTime"> - <input name="endTime"> <input type="button" name="his_btn" value="查询"></div>
+                        <div id="his_chart" style="max-width:95%;min-height: 400px"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+
+<script type="text/javascript">
+    function activeLastPointToolip(chart) {
+        //console.log(chart.xAxis[0].categories);
+        //console.log(chart.series[28]);
+        /*
+        for( var i=0;i < chart.series.length;i++){
+            chart.tooltip.refresh(chart.series[i].points[chart.series[i].points.length -1]);
+        }
+        */
+    }
+
+    var options = {
+        chart: {
+            type: 'spline',
+            animation: Highcharts.svg,
+            marginRight: 10,
+            events: {
+                load: function () {
+                    var series = this.series,
+                        //categories = this.xAxis[0].categories,
+                        chart = this;
+                    setInterval(function () {
+                        /*
+                         var i=1;
+                        $.each(series,function(key,value){
+                            series[key].addPoint({x:(1494469500 + i * 60) * 1000,y:Math.random()* 100}, true, true);
+                        })
+                        i++;
+                        activeLastPointToolip(chart);
+                         */
+                        $.getJSON('/qiuqiu-cur-ping', function (data) {
+                            if (data.succ == true){
+                                $.each(series,function(key,value){
+                                    if(data.data.hasOwnProperty(value.name))
+                                    {
+                                        var d = eval("data.data." + value.name);
+                                        //console.log(d);
+                                        //console.log(series[key]);
+                                        series[key].addPoint(d, true, true);
+                                    }
+                                })
+                                //categories.shift();
+                                //categories.push(data.category);
+                                //chart.xAxis[0].update({categories:categories});
+                                activeLastPointToolip(chart)
+                            }
+                        });
+                    }, 60000);
+                }
+            }
+        },
+        credits:{
+            enabled:false
+        },
+        title: {
+            text: '动态实时数据'
+        },
+        xAxis: {
+            labels:{
+                formatter: function () {
+                    return Highcharts.dateFormat('%H-%M', this.value);
+                }
+            }
+        },
+        yAxis: {
+            title: {
+                text: 'Ms'
+            },
+            plotLines: [{
+                value: 0,
+                width: 1,
+                color: '#808080'
+            }]
+        },
+        tooltip: {
+            formatter: function () {
+                return '<b>' + this.series.name + '</b> : '+Highcharts.numberFormat(this.y, 2)+'Ms<br/>' +
+                    Highcharts.dateFormat('%Y-%m-%d %H:%M', this.x) + '<br/>';
+            }
+        },
+        plotOptions: {
+            column:{
+                dataLabels:{
+                    enabled: true
+                }
+            }
+        },
+        legend: {
+            enabled: false
+        },
+        exporting: {
+            enabled: false
+        },
+        series: <?php echo $series; ?>
+    };
+
+    var defaultprovince = [];
+    $("#searchForm :checkbox:checked[class='province']").each(function(){
+        defaultprovince.push($(this).val());
+    })
+    $.each(options.series,function(key,value){
+        if ($.inArray(value.name,defaultprovince) != -1){
+            options.series[key].visible=true
+        }
+    });
+
+    var sec_chart = new Highcharts.Chart('sec_chart',options, function(c) {
+        activeLastPointToolip(c)
+    });
+
+
+
+    var his_options = {
+        chart: {
+            type: 'spline',
+            animation: Highcharts.svg,
+            marginRight: 10
+        },
+        credits:{
+            enabled:false
+        },
+        title: {
+            text: '历史数据'
+        },
+        xAxis: {
+            labels:{
+                formatter: function () {
+                    return Highcharts.dateFormat('%H-%M', this.value);
+                }
+            }
+        },
+        yAxis: {
+            title: {
+                text: 'Ms'
+            },
+            plotLines: [{
+                value: 0,
+                width: 1,
+                color: '#808080'
+            }]
+        },
+        tooltip: {
+            formatter: function () {
+                return '<b>' + this.series.name + '</b> : '+Highcharts.numberFormat(this.y, 2)+'Ms<br/>' +
+                    Highcharts.dateFormat('%Y-%m-%d %H:%M', this.x) + '<br/>';
+            }
+        },
+        plotOptions: {
+            column:{
+                dataLabels:{
+                    enabled: true
+                }
+            }
+        },
+        legend: {
+            enabled: false
+        },
+        exporting: {
+            enabled: false
+        }
+    };
+
+
+    $("#searchForm :checkbox[class='province']").on('change',function(){
+        var cur_province = $(this).val();
+        var checked = $(this).is(':checked');
+        $.each(sec_chart.series,function(k,v){
+            if (v.name == cur_province){
+                if (checked){
+                    sec_chart.series[k].show();
+                }else{
+                    sec_chart.series[k].hide();
+                }
+                return;
+            }
+        })
+
+        var Days = 30;
+        var exp = new Date();
+        exp.setTime(exp.getTime() + Days*24*60*60*1000);
+        var checkedProvince = [];
+        $("#searchForm :checkbox:checked[class='province']").each(function(){
+            checkedProvince.push($(this).val());
+        })
+        console.log(checkedProvince);
+        document.cookie = 'qiuqiu-ping-province='+ checkedProvince.join(",") + ";expires=" + exp.toGMTString();
+    })
+
+
+    $(":button[name=his_btn]").click(function(){
+        var startTime = jQuery(':text[name=startTime]').val(),
+            endTime = jQuery(':text[name=endTime]').val();
+        var province = [];
+        $("#searchForm :checkbox:checked[class='province']").each(function(){
+            province.push($(this).val());
+        })
+        $.getJSON('/qiuqiu-his-ping',{startTime:startTime,endTime:endTime,province:province},function(data){
+            if(data.succ == false){
+                alert(data.msg);
+                return;
+            }
+            //console.log(data.series);
+            //console.log(his_options.series);
+            his_options.series = data.series;
+            new Highcharts.Chart('his_chart',his_options);
+        })
+    })
+
+    $(function(){
+        $.datetimepicker.setLocale('zh');
+
+        jQuery(':text[name=startTime]').datetimepicker({
+            format:'Y/m/d H:i',
+            onShow:function( ct ){
+                this.setOptions({
+                    maxDate:jQuery(':text[name=endTime]').val()?jQuery(':text[name=endTime]').val():false
+                })
+            }
+        });
+        jQuery(':text[name=endTime]').datetimepicker({
+            format:'Y/m/d H:i',
+            onShow:function( ct ){
+                this.setOptions({
+                    minDate:jQuery(':text[name=startTime]').val()?jQuery(':text[name=startTime]').val():false
+                })
+            }
+        });
+
+    })
+
+</script>

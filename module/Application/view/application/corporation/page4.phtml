@@ -1,0 +1,154 @@
+<div class="manage-area-nav">
+    <h2><?= $this->layout()->menus[$this->layout()->id] ?></h2>
+
+    <div class="list project"></div>
+    <div class="list region"></div>
+    <!--<a class="unbind" href="javascript:void(0)">解除绑定</a>-->
+</div>
+<div class="cor-content alert alert-info">
+    项目映射关系：1对1
+</div>
+<br>
+<div class="cor-content">
+    <form>
+        <div class="form-group">
+            <label for="pProject">项目</label>
+            <select class="form-control" id="pProject">
+                <option value="0">选择项目...</option>
+                <?php
+                foreach($this->projects as $id => $name){
+                    ?>
+                    <option value="<?=$id?>"><?=$name?></option>
+                <?php
+                }
+                ?>
+            </select>
+            <p>当前绑定关系:<code id="pCur">无</code></p>
+        </div>
+        <div class="form-group">
+            <label for="pFirm">主机厂商</label>
+            <select class="form-control" id="pFirm">
+                <option value="0">选择厂商...</option>
+                <option value="100000">星云</option>
+                <option value="100001">腾讯云</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="pFirmProject">厂商项目</label>
+            <select class="form-control" id="pFirmProject">
+                <option value="0">选择厂商项目...</option>
+                <option value="1">武极</option>
+                <option value="2">征途</option>
+            </select>
+        </div>
+        <button type="button" class="btn btn-default" id="btnBind">关联</button>
+    </form>
+</div>
+
+<script type="application/javascript">
+    $(function(){
+        window.fProjects = {};
+        function getProjects(fid, fn)
+        {
+            if(window.fProjects[fid])
+            {
+                fn && fn(window.fProjects[fid]);
+                return false;
+            }
+            window.loading('show');
+            $.get(
+                '/corp/get-firm-projects',
+                {
+                    fid : fid
+                },
+                function(ret)
+                {
+                    if(ret.code == 0)
+                    {
+                        window.fProjects[fid] = ret.data;
+                        fn && fn(ret.data);
+                        window.loading();
+                    }
+                },
+                'json'
+            );
+        }
+        $("#pFirm").change(function(){
+            var fid = this.value;
+            if(fid == 0)
+            {
+                return false;
+            }
+            getProjects(fid, function(data){
+                var firmProjectSelect = $("#pFirmProject").empty();
+                firmProjectSelect.append('<option value="0">选择厂商项目...</option>');
+                $.each(data, function(i,n){
+                    firmProjectSelect.append('<option value="'+i+'">'+n+'</option>')
+                });
+            });
+        });
+        $('#btnBind').click(function(){
+            var pid  = $("#pProject").val();
+            var fid  = $("#pFirm").val();
+            var fpid = $("#pFirmProject").val();
+            var name = $("#pFirmProject option:selected").text();
+
+            if(pid == 0)
+            {
+                alert('请选择项目');
+                return false;
+            }
+            if(fid == 0)
+            {
+                alert('请选择厂商');
+                return false;
+            }
+            if(fpid == 0)
+            {
+                alert('请选择厂商项目');
+                return false;
+            }
+            $.post(
+                '/corp/bind-projects',
+                {
+                    pid : pid,
+                    fid : fid,
+                    fpid : fpid,
+                    name : name
+                },
+                function(ret)
+                {
+                    if(ret.code == 0)
+                    {
+                        alert('关联成功');
+                        var fname = $("#pFirm option:selected").text();
+                        $("#pCur").html(fname + ' - ' + name);
+                    } else if(ret.error) {
+                        alert(ret.error);
+                    }
+                },
+                'json'
+            )
+        });
+        $("#pProject").change(function(){
+            var pid = this.value;
+            if(pid == 0) return false;
+            $.get(
+                '/corp/get-project-info',
+                {
+                    pid : pid
+                },
+                function(ret)
+                {
+                    if(ret.code == 0 && ret.data)
+                    {
+                        $("#pCur").html(ret.data);
+                    } else {
+                        $("#pCur").html('无');
+                    }
+                },
+                'json'
+            );
+        });
+    });
+</script>

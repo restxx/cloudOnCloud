@@ -1,0 +1,724 @@
+<?php
+use Application\Model\UserFirmPassportTable;
+$usedFirms = UserFirmPassportTable::getInstance()->getBoundFirms($this->identity()['uid']);
+$myProds = [];
+foreach($usedFirms as $value)
+    $myProds[] = $value['fid'];
+
+$unUsedProds = [];
+foreach ($this->firms as $k=>$value){
+    if (in_array($k,$myProds)) continue;
+    $unUsedProds[] = $k;
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="data:image/ico;base64,aWNv">
+<title>主机管理 - 云上云</title>
+<link href="/smartMenu/smartMenu.css" rel="stylesheet" type="text/css"/>
+<link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+<link href="/DataTables-1.10.11/media/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css"/>
+<link href="/DataTables-1.10.11/extensions/FixedColumns/css/fixedColumns.dataTables.min.css" rel="stylesheet"
+      type="text/css"/>
+<link href="/css/stylesheet.css" rel="stylesheet" type="text/css"/>
+<script type="application/javascript" src="/towcloud/js/jquery-1.12.1.min.js"></script>
+<script type="application/javascript" src="/js/dropdownlist.js"></script>
+<script type="application/javascript" src="/smartMenu/jquery-smartMenu.js"></script>
+<script type="application/javascript" src="/DataTables-1.10.11/media/js/jquery.dataTables.min.js"></script>
+<script type="application/javascript"
+        src="/DataTables-1.10.11/extensions/FixedColumns/js/dataTables.fixedColumns.min.js"></script>
+<script type="application/javascript" src="/bootstrap/js/bootstrap.min.js"></script>
+<script type="application/javascript" src="/js/NavigationMenu.js"></script>
+<script type="application/javascript" src="http://cdn.hcharts.cn/highcharts/highcharts.js"></script>
+<script type="text/javascript" src="/js/moment.js"></script>
+<script type="text/javascript" src="/js/daterangepicker.js"></script>
+<script type="text/javascript" src="/js/ui.js"></script>
+<link href="/css/font-awesome.min.css" rel="stylesheet">
+<link rel="stylesheet" type="text/css" media="all" href="/css/daterangepicker-bs3.css"/>
+
+<script>
+
+Highcharts.setOptions({
+    global: {
+        useUTC: false
+    }
+});
+
+$(function () {
+    $.ajaxSetup({
+        error: function (xhr, textStatus, errorThrown) {
+            //location.href = '/login';
+        }
+    });
+    $('.close-left').click(function () {
+        var me = $(this);
+        if (me.hasClass('open-left')) {
+            $('.manage-container .left').animate({'margin-left': 0}, 300);
+            me.removeClass('open-left glyphicon-triangle-right').addClass('glyphicon-triangle-left');
+            $('.manage-container .right').animate({'left': 200}, 300);
+        } else {
+            $('.manage-container .left').animate({'margin-left': -200}, 300);
+            me.removeClass('glyphicon-triangle-left').addClass('open-left glyphicon-triangle-right');
+            $('.manage-container .right').animate({'left': 0}, 300);
+        }
+    });
+    /*$('.nav-menu-left .others').NavOverMenu({
+     name: '其他',
+     width: 80,
+     height: 48
+     });*/
+    $('.nav-menu-right .user-info').NavOverMenu({
+        alignPosition: 'right',
+        containerWidth: 150,
+        containerHeight: 100,
+        width: 80,
+        height: 48
+    });
+
+    window.alert = function (msg) {
+
+        var dom = $("#modal_alert");
+
+        dom.find(".modal-body p").html(msg);
+
+        dom.modal({
+            backdrop: false,
+            keyboard: false
+        });
+    };
+
+    window.confirmModal = function (msg, callback) {
+        var dom = $("#confirm");
+
+        dom.find(".modal-body p").text(msg);
+
+        dom.modal({
+            backdrop: false,
+            keyboard: false
+        });
+        dom.find("a[name=confirm-ok]").off().on('click', function () {
+            callback && callback();
+        });
+    };
+    window.confirmChangePass = function (data, callback) {
+        var dom = $("#modal_changePass");
+        if (data.desc) {
+            dom.find(".desc").html(data.desc);
+        }
+        dom.modal('show');
+
+        dom.find('#btnChangePass').unbind().click(function () {
+            var npassword = dom.find('#npassword').val();
+            var cpassword = dom.find('#cpassword').val();
+            if (npassword != cpassword) {
+                alert('两次密码不相同');
+                return false;
+            }
+            if (data.id) {
+                data.pass = npassword;
+            } else {
+                return;
+            }
+            callback && callback(data);
+            dom.modal('hide');
+        })
+
+    };
+
+    window.show_msg = function (msg) {
+
+        var dom = $("#modal_msg");
+
+        dom.find(".modal-body p").html(msg);
+
+        dom.modal({
+            backdrop: false,
+            keyboard: false
+        });
+    };
+
+    window.loading = function (type) {
+        if (type == 'show') {
+            $("#showloading").show();
+            $("#showloading").css('top', $(window).scrollTop());
+        } else {
+            $("#showloading").hide();
+        }
+    };
+    window.showLoading = function () {
+        window.loading('show');
+    };
+    window.hideLoading = function () {
+        window.loading();
+    };
+    var errorMessage = '<?= $this->errorMessage?:''?>';
+    if (errorMessage) alert(errorMessage);
+    $("#btn-chpwd").click(function () {
+        var form = $("#form_chpwd");
+        var oldPassword = form.find('input[name=old_password]').val();
+        var newPassword = form.find('input[name=new_password]').val();
+        var cnewPassword = form.find('input[name=cnew_password]').val();
+        if (!oldPassword || !newPassword || !cnewPassword) {
+            return false;
+        }
+        if (newPassword != cnewPassword) {
+            alert('两次密码不相同');
+            return false;
+        }
+        $.post(
+            '/change-password',
+            {
+                oldPassword: oldPassword,
+                newPassword: newPassword
+            },
+            function (ret) {
+                $("#modal_chpwd").modal('hide');
+                if (ret.code == 0) {
+                    alert('修改成功');
+                } else if (ret.error) {
+                    alert(ret.error);
+                }
+            },
+            'json'
+        );
+    });
+});
+function showAddBWModal(data,fn)
+{
+    var $modal = $('#addBlueWhaleModal');
+    $modal.find('#wanip').html(data.wanip);
+    $modal.find('#lanip').html(data.lanip);
+
+    $modal.find('#doAddToBW').unbind().click(function(){
+        var appid = $modal.find("#appID").val();
+        fn && fn(appid);
+    });
+    $modal.find('#createNewApp').unbind().click(function(){
+        var name = prompt("请输入业务名称");
+        if(name)
+        {
+            $.post(
+                '/m/create-new-app/<?=$this->fid?>',
+                {
+                    name : name
+                },
+                function(ret)
+                {
+                    if(ret.code == 0)
+                    {
+                        var option = '<option selected value="' + ret.data[0] + '">' + ret.data[1] + '</option>';
+                        $modal.find('#appID').append(option);
+                        alert('添加成功');
+                    } else if(ret.error) {
+                        alert(ret.error);
+                    }
+                },
+                'json'
+            );
+        }
+    });
+    $.get(
+        '/m/get-app-list/<?=$this->fid?>',
+        {},
+        function(ret){
+            if(typeof ret.data == "object")
+            {
+                $modal.find('#appID').empty();
+                $.each(ret.data, function(i,n){
+                    var option = '<option value="' + i + '">' + n + '</option>';
+                    $modal.find('#appID').append(option);
+                });
+                $modal.modal('show');
+            } else {
+                alert('无可用业务供选择，请到蓝鲸创建业务');
+            }
+        },
+        'json'
+    );
+
+}
+function hideAddBWModal()
+{
+    var $modal = $('#addBlueWhaleModal');
+    $modal.modal('hide');
+}
+/* data [[id, ip, name]]*/
+function initJumpServerModal(data) {
+    var modal = $("#addToJSModal");
+    var form = modal.find('form');
+    var list = modal.find(".list");
+    var trTemplate = modal.find('.hostSelected').eq(0);
+    list.empty();
+    for (var i = 0; i < data.length; i++) {
+        var tr = trTemplate.clone();
+        var tds = tr.find('td');
+        var item = data[i];
+        var ips = item[2].split(',');
+        tds.eq(0).find('span').html(item[0]);
+        tds.eq(0).find('input').val(item[0]);
+        tds.eq(0).find('input').attr('name', 'id[' + i + ']');
+        tds.eq(1).find('span').html(item[1]);
+        tds.eq(1).find('input').val(item[1]);
+        tds.eq(1).find('input').attr('name', 'ip[' + i + ']');
+        tds.eq(2).find('span').html(ips[0]);
+        tds.eq(2).find('input').val(ips[0]);
+        tds.eq(2).find('input').attr('name', 'name[' + i + ']');
+        tds.eq(3).find('input').attr('name', 'username[' + i + ']');
+        tds.eq(4).find('input').attr('name', 'port[' + i + ']');
+        list.append(tr);
+    }
+
+    modal.find('#jServerSave').unbind().click(function () {
+        modal.modal('hide');
+        var username = modal.find('.username').val();
+        var port = modal.find('.port').val();
+        if (!port || (port < 0) || (port > 65535)) {
+            alert('请填写正确的端口号');
+            return false;
+        }
+        $.post(
+            '/add-to-jump-server/<?=$this->fid?>',
+            form.serializeArray(),
+            function (ret) {
+                if (ret.code == 0) {
+                    alert('添加成功');
+                    /*if(ret.data)
+                     {
+                     $.each(ret.data,function(i,n){
+                     console.log(i,n)
+                     })
+                     }*/
+                } else if (ret.error) {
+                    alert(ret.error);
+                }
+            },
+            'json'
+        )
+
+    });
+    modal.modal();
+}
+<?php
+    if($this->action == 'detail')
+    {
+    ?>
+var isLogTableInit = false;
+function initLogTable(hid) {
+    if (isLogTableInit) return;
+    isLogTableInit = true;
+    var table = $('#host_operation_log').DataTable({
+        dom: '<"toolbar">frtip',
+        processing: true,
+        serverSide: true,
+        ordering: false,
+        searching: false,
+        scrollX: true,
+        //scrollY:300,
+        scrollCollapse: false,
+        searchDelay: 1000,
+        pageLength: 10,
+        fixedColumns: {
+            leftColumns: 0,
+            rightColumns: 0
+        },
+        ajax: {
+            url: '/get-operation-log/' + <?=$this->layout()->fid?>,
+            type: 'POST',
+            data: function (d) {
+                d.hid = hid;
+            }
+        },
+        language: {
+            url: "/DataTables-1.10.11/media/languages/chinese.json"
+        },
+        columns: [
+            {
+                data: 'username',
+                render: function (data, type, full, meta) {
+                    return data;
+                },
+                bSortable: false
+            },
+            {
+                data: 'operation',
+                render: function (data, type, full, meta) {
+                    return data;
+                },
+                searchable: false
+            },
+            {
+                data: 'result',
+                render: function (data, type, full, meta) {
+                    var re = ['<span style="color:red;">失败</span>', '<span style="color:#06c290;">成功</span>'];
+                    return re[data];
+                },
+                searchable: false
+            },
+            {
+                data: 'create_at',
+                render: function (data, type, full, meta) {
+                    return data;
+                },
+                searchable: false
+            }
+        ]
+    });
+}
+<?php
+    }
+?>
+</script>
+</head>
+<body>
+<div class="manager-top">
+    <div class="logo"><a href="/"></a></div>
+    <div class="nav-menu">
+        <div class="nav-menu-left">
+            <ul>
+                <li onclick="location.href='/manager'">总览</li>
+                <!--
+                <?php
+                if ($this->get('account')['puid'] == 0) {
+                    ?>
+                    <li onclick="location.href='/cor-index/1'">项目权限管理</li>
+                <?php
+                }
+                ?>
+                <li onclick="window.open('http://cmdb.twocloud.cn')">蓝鲸配置平台</li>
+                <li onclick="window.open('http://job.twocloud.cn')">蓝鲸作业平台</li>
+                -->
+            </ul>
+        </div>
+        <div class="nav-menu-right">
+            <ul>
+                <li onclick="location.href='/login-out'"><span class="glyphicon glyphicon-log-out"></span> 注销</li>
+                <li class="user-info">
+                    <a href='javascript:void(0)' class="menu-text">
+                        <span class="glyphicon glyphicon-user"></span>
+                        <span>
+                            <?=
+                            strlen($this->get('account')['username']) < 8 ? $this->get('account')['username'] :
+                                mb_substr($this->get('account')['username'], 0, 8) ?>
+                        </span>
+                    </a>
+
+                    <div class="menu-container">
+                        <p data-toggle="modal" data-target="#modal_chpwd">修改密码</p>
+                    </div>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="manage-container">
+    <div class="left">
+        <h2>设备</h2>
+        <hr class="line">
+        <dl>
+            <?php if(!empty($myProds)):?>
+            <dd style="cursor: default;"><span style="font-size: 18px;margin-left: 15px; margin-right: 10px;">我的产品</span><i class="fa fa-plus-square" aria-hidden="true" style="cursor: pointer;" id="more_prod"></i></dd>
+            <?php foreach ($this->firms as $k => $config) {
+                if (!in_array($k,$myProds)) continue;
+                $controller = ($k == 100000 || $k == 100007) ? 'panel' : 'control';
+            ?>
+                <dd>
+                    <a href="/<?= $controller?>/<?= $k ?>" class="<?= ($this->fid == $k) ? 'left-selected' : '' ?>">
+                        <span><?= $config['name'] ?></span>
+                    </a>
+                </dd>
+            <?php } ?>
+            <?php endif;?>
+            <?php if(!empty($unUsedProds)):?>
+            <div name="unUserdPords" style="display: none">
+            <?php foreach ($this->firms as $k => $config) {
+                    if (!in_array($k,$unUsedProds)) continue;
+                    $controller = ($k == 100000 || $k == 100007) ? 'panel' : 'control';
+            ?>
+                    <dd>
+                        <a href="/<?= $controller?>/<?= $k ?>" class="<?= ($this->fid == $k) ? 'left-selected' : '' ?>">
+                            <span><?= $config['name'] ?></span>
+                        </a>
+                    </dd>
+            <?php  } ?>
+                    </div>
+            <?php endif;?>
+            <hr class="line">
+            <!--
+            <dd>
+                <a href="/jump-server-manager"
+                   class="<?= ($this->action == 'jump-server-manager') ? 'left-selected' : '' ?>"><span>堡垒机管理</span></a>
+            </dd>
+            -->
+            <dd>
+                <a href="/audit-log"
+                   class="<?= ($this->action == 'audit-log') ? 'left-selected' : '' ?>"><span>审计日志</span></a>
+            </dd>
+            <?php
+            if ($this->fid == 100000) {
+                ?>
+                <dd>
+                    <a href="/financial-report"
+                       class="<?= ($this->action == 'financial-report') ? 'left-selected' : '' ?>"><span>财务报表-星云</span></a>
+                </dd>
+            <?php
+            }
+            ?>
+            <hr class="line">
+            <dd>
+                <a href="/qiuqiu"
+                   class="<?= ($this->action == 'qq-ping-data') ? 'left-selected' : '' ?>"><span>全国网络状况</span></a>
+            </dd>
+        </dl>
+        <a class="close-left glyphicon glyphicon-triangle-left"></a>
+    </div>
+    <div class="right">
+        <div class="manage-area">
+            <?= $this->content ?>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modal_alert" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 10000;">
+
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">×</button>
+                <h3>提示</h3>
+            </div>
+            <div class="modal-body">
+                <p></p>
+            </div>
+            <div class="modal-footer">
+                <a href="#" class="btn btn-default" data-dismiss="modal" name="alert-ok">关闭</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modal_msg" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <p></p>
+            </div>
+            <div class="modal-footer">
+                <a href="#" class="btn btn-default" data-dismiss="modal" name="alert-ok">关闭</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="showloading"
+     style="display:none;z-index: 10000; background: url(/img/loading.gif) center no-repeat; background-color: rgba(10, 10, 10, 0.8); position: absolute; top: 0px; left: 0px; width: 100%; min-height: 100%; text-align: center;"></div>
+<div class="modal fade" id="addToJSModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">添加以下主机到堡垒机</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>主机ID</th>
+                            <th>主机名</th>
+                            <th>公网IP</th>
+                            <th>用户名</th>
+                            <th>端口</th>
+                        </tr>
+                        </thead>
+                        <tbody class="list">
+                        <tr class="hostSelected">
+                            <td><span></span><input type="hidden" name="id" value=""></td>
+                            <td><span></span><input type="hidden" name="ip" value=""></td>
+                            <td><span></span><input type="hidden" name="name" value=""></td>
+                            <td><input class="form-control username" name="username" value="root"/></td>
+                            <td><input class="form-control port" name="port" type="number" value="22"/></td>
+                        </tr>
+                        </tbody>
+
+                    </table>
+                </form>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="jServerSave">提交</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="confirm" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">×</button>
+                <h3>确认</h3>
+            </div>
+            <div class="modal-body">
+                <p></p>
+            </div>
+            <div class="modal-footer">
+                <a href="#" class="btn btn-default" data-dismiss="modal" name="confirm-close">关闭</a>
+                <a href="#" class="btn btn-primary" data-dismiss="modal" name="confirm-ok">确认</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modal_chpwd" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">修改密码</h4>
+            </div>
+            <div class="modal-body">
+                <form id="form_chpwd">
+                    <div class="form-group">
+                        <label for="">旧密码</label>
+                        <input type="password" maxlength="20" class="form-control" name="old_password">
+                    </div>
+                    <div class="form-group">
+                        <label for="">新密码</label>
+                        <input type="password" maxlength="20" class="form-control" name="new_password">
+                    </div>
+                    <div class="form-group">
+                        <label for="">确认新密码</label>
+                        <input type="password" maxlength="20" class="form-control" name="cnew_password">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="btn-chpwd">修改</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modal_editAlertUser" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Create User</h3>
+            </div>
+            <div class="panel-body">
+                <form id="form_optAlertUser">
+                    <div class="form-group">
+                        <label for="name">* 账号（a-zA-Z0-9_-.）：</label>
+                        <input type="text" name="name" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="name">中文名：</label>
+                        <input type="text" name="cname" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">邮箱：</label>
+                        <input type="email" name="email" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">手机：</label>
+                        <input type="text" name="phone" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="name">QQ：</label>
+                        <input type="text" name="qq" class="form-control">
+                    </div>
+
+                    <div class="pull-right">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-primary" id="btnOptAlertUser">提交</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="modal fade" id="modal_changePass" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h3 class="panel-title">修改密码</h3>
+            </div>
+            <div class="panel-body">
+                <code class="desc"></code>
+                <br><br>
+
+                <form id="form_changePass">
+                    <div class="form-group">
+                        <label for="npassword">新密码：</label>
+                        <input type="password" name="npassword" id="npassword" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="cpassword">确认新密码：</label>
+                        <input type="password" name="cpassword" id="cpassword" class="form-control">
+                    </div>
+                    <div class="pull-right">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-primary" id="btnChangePass">修改</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+<div class="modal fade" id="addBlueWhaleModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">添加主机到蓝鲸系统</h4>
+            </div>
+            <div class="modal-body">
+                <p>主机信息 Wan IP:<code id="wanip"></code>&nbsp;&nbsp;Lan IP:<code id="lanip"></code></p>
+                <p></p>
+                <div>
+                    <form>
+                        <div class="form-group">
+                            <label for="appID">要导入的业务</label>
+                            <select class="form-control" id="appID">
+                            </select>
+                            <span><a href="javascript:void(0);" id="createNewApp">创建新业务</a></span>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="doAddToBW">添加</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function(){
+        $("#more_prod").on('click',function(){
+            if ($(this).hasClass('fa-plus-square')){
+                $("div[name=unUserdPords]").show();
+                $(this).removeClass('fa-plus-square').addClass('fa-minus-square');
+            }else{
+                $("div[name=unUserdPords]").hide();
+                $(this).removeClass('fa-minus-square').addClass('fa-plus-square');
+            }
+
+        })
+    })
+</script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+-- --------------------------------------------------------
+-- 主机:                           127.0.0.1
+-- 服务器版本:                        5.6.17-log - MySQL Community Server (GPL)
+-- 服务器操作系统:                      Win64
+-- HeidiSQL 版本:                  8.3.0.4694
+-- --------------------------------------------------------
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET NAMES utf8 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+
+-- 导出 towcloud 的数据库结构
+CREATE DATABASE IF NOT EXISTS `towcloud` /*!40100 DEFAULT CHARACTER SET utf8 */;
+USE `towcloud`;
+
+
+-- 导出  表 towcloud.users 结构
+CREATE TABLE IF NOT EXISTS `users` (
+  `uid` bigint(20) NOT NULL AUTO_INCREMENT,
+  `username` varchar(20) NOT NULL,
+  `mobile` bigint(20) DEFAULT NULL,
+  `password` varchar(40) NOT NULL,
+  `email` varchar(128) DEFAULT NULL,
+  `nickname` varchar(40) DEFAULT NULL,
+  `sex` tinyint(4) DEFAULT NULL,
+  `money` bigint(20) NOT NULL DEFAULT '0',
+  `updetime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `createtime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`uid`),
+  UNIQUE KEY `username` (`username`),
+  UNIQUE KEY `mobile` (`mobile`),
+  UNIQUE KEY `nickname` (`nickname`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+
+-- 正在导出表  towcloud.users 的数据：0 rows
+/*!40000 ALTER TABLE `users` DISABLE KEYS */;
+INSERT INTO `users` (`uid`, `username`, `mobile`, `password`, `email`, `nickname`, `sex`, `money`, `updetime`, `createtime`) VALUES
+	(1, 'lijun1234', NULL, '25d55ad283aa400af464c76d713c07ad', NULL, NULL, NULL, 0, '2016-03-28 16:29:27', '2016-03-28 16:29:27');
+/*!40000 ALTER TABLE `users` ENABLE KEYS */;
+
+
+-- 导出  表 towcloud.user_firm_passport 结构
+CREATE TABLE IF NOT EXISTS `user_firm_passport` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `uid` bigint(20) unsigned NOT NULL,
+  `fid` int(10) unsigned NOT NULL,
+  `passport_info` text NOT NULL,
+  `state` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0:正常，1:未定义',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+
+-- 正在导出表  towcloud.user_firm_passport 的数据：~0 rows (大约)
+/*!40000 ALTER TABLE `user_firm_passport` DISABLE KEYS */;
+INSERT INTO `user_firm_passport` (`id`, `uid`, `fid`, `passport_info`, `state`) VALUES
+	(1, 1, 100000, '{"username":"test01","password":"test01"}', 0),
+	(2, 1, 100001, '{"secretId":"AKIDjFNVAqwXBDg1SOboLGTEKeWeHlVMp6Sz","secretKey":"rKMOvroqS1enWv7IwqScMdTg8TRmqeAv"}', 0);
+/*!40000 ALTER TABLE `user_firm_passport` ENABLE KEYS */;
+/*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
+/*!40014 SET FOREIGN_KEY_CHECKS=IF(@OLD_FOREIGN_KEY_CHECKS IS NULL, 1, @OLD_FOREIGN_KEY_CHECKS) */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

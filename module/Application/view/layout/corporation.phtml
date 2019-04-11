@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="data:image/ico;base64,aWNv">
+<title>主机管理 - 云上云</title>
+<link href="/smartMenu/smartMenu.css" rel="stylesheet" type="text/css"/>
+<link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+<link href="/DataTables-1.10.11/media/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css"/>
+<link href="/DataTables-1.10.11/extensions/FixedColumns/css/fixedColumns.dataTables.min.css" rel="stylesheet"
+      type="text/css"/>
+<link href="/css/stylesheet.css" rel="stylesheet" type="text/css"/>
+<script type="application/javascript" src="/towcloud/js/jquery-1.12.1.min.js"></script>
+<script type="application/javascript" src="/js/dropdownlist.js"></script>
+<script type="application/javascript" src="/smartMenu/jquery-smartMenu.js"></script>
+<script type="application/javascript" src="/DataTables-1.10.11/media/js/jquery.dataTables.min.js"></script>
+<script type="application/javascript"
+        src="/DataTables-1.10.11/extensions/FixedColumns/js/dataTables.fixedColumns.min.js"></script>
+<script type="application/javascript" src="/bootstrap/js/bootstrap.min.js"></script>
+<script type="application/javascript" src="/js/NavigationMenu.js"></script>
+<script type="application/javascript" src="http://cdn.hcharts.cn/highcharts/highcharts.js"></script>
+<script type="text/javascript" src="/js/moment.js"></script>
+<script type="text/javascript" src="/js/daterangepicker.js"></script>
+<script type="text/javascript" src="/js/ui.js"></script>
+<link href="/css/font-awesome.min.css" rel="stylesheet">
+<link rel="stylesheet" type="text/css" media="all" href="/css/daterangepicker-bs3.css"/>
+
+<script>
+$(function () {
+    $('.close-left').click(function () {
+        var me = $(this);
+        if (me.hasClass('open-left')) {
+            $('.manage-container .left').animate({'margin-left': 0}, 300);
+            me.removeClass('open-left glyphicon-triangle-right').addClass('glyphicon-triangle-left');
+            $('.manage-container .right').animate({'left': 200}, 300);
+        } else {
+            $('.manage-container .left').animate({'margin-left': -200}, 300);
+            me.removeClass('glyphicon-triangle-left').addClass('open-left glyphicon-triangle-right');
+            $('.manage-container .right').animate({'left': 0}, 300);
+        }
+    });
+    /*$('.nav-menu-left .others').NavOverMenu({
+     name: '其他',
+     width: 80,
+     height: 48
+     });*/
+    $('.nav-menu-right .user-info').NavOverMenu({
+        alignPosition: 'right',
+        containerWidth: 150,
+        containerHeight: 100,
+        width: 80,
+        height: 48
+    });
+
+    window.alert = function (msg) {
+
+        var dom = $("#modal_alert");
+
+        dom.find(".modal-body p").html(msg);
+
+        dom.modal({
+            backdrop: false,
+            keyboard: false
+        });
+    };
+
+    window.confirmModal = function (msg, callback) {
+        var dom = $("#confirm");
+
+        dom.find(".modal-body p").html(msg);
+
+        dom.modal({
+            backdrop: false,
+            keyboard: false
+        });
+        dom.find("a[name=confirm-ok]").off().on('click', function () {
+            callback && callback();
+        });
+    };
+    window.confirmChangePass = function (data, callback) {
+        var dom = $("#modal_changePass");
+        if(data.desc)
+        {
+            dom.find(".desc").html(data.desc);
+        }
+        dom.modal('show');
+
+        dom.find('#btnChangePass').unbind().click(function(){
+            var npassword = dom.find('#npassword').val();
+            var cpassword = dom.find('#cpassword').val();
+            if(npassword != cpassword)
+            {
+                alert('两次密码不相同');
+                return false;
+            }
+            if(data.id){
+                data.pass = npassword;
+            } else {
+                return;
+            }
+            callback && callback(data);
+            dom.modal('hide');
+        })
+
+    };
+
+    window.show_msg = function (msg) {
+
+        var dom = $("#modal_msg");
+
+        dom.find(".modal-body p").html(msg);
+
+        dom.modal({
+            backdrop: false,
+            keyboard: false
+        });
+    };
+
+    window.loading = function (type) {
+        if (type == 'show') {
+            $("#loading").show();
+            $("#loading").css('top', $(window).scrollTop());
+        } else {
+            $("#loading").hide();
+        }
+    };
+    var errorMessage = '<?= $this->errorMessage?:''?>';
+    if (errorMessage) alert(errorMessage);
+    $("#btn-chpwd").click(function () {
+        var form = $("#form_chpwd");
+        var oldPassword = form.find('input[name=old_password]').val();
+        var newPassword = form.find('input[name=new_password]').val();
+        var cnewPassword = form.find('input[name=cnew_password]').val();
+        if (!oldPassword || !newPassword || !cnewPassword) {
+            return false;
+        }
+        if (newPassword != cnewPassword) {
+            alert('两次密码不相同');
+            return false;
+        }
+        $.post(
+            '/change-password',
+            {
+                oldPassword: oldPassword,
+                newPassword: newPassword
+            },
+            function (ret) {
+                $("#modal_chpwd").modal('hide');
+                if (ret.code == 0) {
+                    alert('修改成功');
+                } else if (ret.error) {
+                    alert(ret.error);
+                }
+            },
+            'json'
+        );
+    });
+});
+
+
+</script>
+</head>
+<body>
+<div class="manager-top">
+    <div class="logo"><a href="/"></a></div>
+    <div class="nav-menu">
+        <div class="nav-menu-left">
+            <ul>
+                <li onclick="location.href='/manager'">总览</li>
+                <!--
+                <?php
+                if ($this->get('account')['puid'] == 0) {
+                    ?>
+                    <li onclick="location.href='/cor-index/1'">项目权限管理</li>
+                <?php
+                }
+                ?>
+                <li onclick="window.open('http://cmdb.twocloud.cn')">蓝鲸配置平台</li>
+                <li onclick="window.open('http://job.twocloud.cn')">蓝鲸作业平台</li>
+                -->
+            </ul>
+        </div>
+        <div class="nav-menu-right">
+            <ul>
+                <li onclick="location.href='/login-out'"><span class="glyphicon glyphicon-log-out"></span> 注销</li>
+                <li class="user-info">
+                    <a href='javascript:void(0)' class="menu-text">
+                        <span class="glyphicon glyphicon-user"></span>
+                        <span>
+                            <?=
+                            strlen($this->get('account')['username']) < 8 ? $this->get('account')['username'] :
+                                substr($this->get('account')['username'], 0, 8) ?>
+                        </span>
+                    </a>
+
+                    <div class="menu-container">
+                        <p data-toggle="modal" data-target="#modal_chpwd">修改密码</p>
+                    </div>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="manage-container">
+    <div class="left">
+        <h2>管理功能</h2>
+        <hr class="line">
+        <dl>
+            <?php foreach ($this->menus as $k => $name) { ?>
+                <dd>
+                    <a href="/cor-index/<?=$k?>" class="<?= ($this->id == $k) ? 'left-selected' : '' ?>">
+                        <span><?= $name ?></span>
+                    </a>
+                </dd>
+            <?php } ?>
+        </dl>
+        <a class="close-left glyphicon glyphicon-triangle-left"></a>
+    </div>
+    <div class="right">
+        <div class="manage-area">
+            <?= $this->content ?>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modal_alert" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 10000;">
+
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">×</button>
+                <h3>提示</h3>
+            </div>
+            <div class="modal-body">
+                <p></p>
+            </div>
+            <div class="modal-footer">
+                <a href="#" class="btn btn-default" data-dismiss="modal" name="alert-ok">关闭</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modal_msg" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <p></p>
+            </div>
+            <div class="modal-footer">
+                <a href="#" class="btn btn-default" data-dismiss="modal" name="alert-ok">关闭</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="loading"
+     style="display:none;z-index: 1000; background: url(/img/loading.gif) center no-repeat; background-color: rgba(10, 10, 10, 0.8); position: absolute; top: 0px; left: 0px; width: 100%; min-height: 100%; text-align: center;"></div>
+<div class="modal fade" id="confirm" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">×</button>
+                <h3>确认</h3>
+            </div>
+            <div class="modal-body">
+                <p></p>
+            </div>
+            <div class="modal-footer">
+                <a href="#" class="btn btn-default" data-dismiss="modal" name="confirm-close">关闭</a>
+                <a href="#" class="btn btn-primary" data-dismiss="modal" name="confirm-ok">确认</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modal_chpwd" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">修改密码</h4>
+            </div>
+            <div class="modal-body">
+                <form id="form_chpwd">
+                    <div class="form-group">
+                        <label for="">旧密码</label>
+                        <input type="password" maxlength="20" class="form-control" name="old_password">
+                    </div>
+                    <div class="form-group">
+                        <label for="">新密码</label>
+                        <input type="password" maxlength="20" class="form-control" name="new_password">
+                    </div>
+                    <div class="form-group">
+                        <label for="">确认新密码</label>
+                        <input type="password" maxlength="20" class="form-control" name="cnew_password">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="btn-chpwd">修改</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal_changePass" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h3 class="panel-title">修改密码</h3>
+            </div>
+            <div class="panel-body">
+                <code class="desc"></code>
+                <br><br>
+                <form id="form_changePass">
+                    <div class="form-group">
+                        <label for="npassword">新密码：</label>
+                        <input type="password" name="npassword" id="npassword" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="cpassword">确认新密码：</label>
+                        <input type="password" name="cpassword" id="cpassword" class="form-control">
+                    </div>
+                    <div class="pull-right">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-primary" id="btnChangePass">修改</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+</body>
+</html>

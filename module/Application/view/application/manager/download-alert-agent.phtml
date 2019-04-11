@@ -1,0 +1,52 @@
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">Falcon-Agent 安装流程</h3>
+    </div>
+    <div class="panel-body">
+        <div style="padding: 20px;">
+            <h3>说明</h3>
+            <br>
+
+            <p><strong>Falcon-Agent</strong> 是Falcon监控工具的客户端，服务器必须安装后才能正常使用Falcon的功能.</p>
+
+            <br>
+
+            <h3>下载</h3>
+            <br>
+
+            <p><strong>方式一</strong> :</p>
+            <a href="http://cdn.mztgame.ztgame.com.cn/package/falcon-agent-5.1.0.tar.gz"
+               target="_blank"
+               style="text-decoration: none;">
+                <code style="cursor: pointer;">点击此处下载Agent</code>
+            </a> 链接下载Falcon客户端的绿色安装包,配置已包含在内，不需要另外操作</p>
+            <br>
+
+            <p><strong>方式二</strong>:</p>
+            在云主机内执行
+            <p><code>wget http://cdn.mztgame.ztgame.com.cn/package/falcon-agent-5.1.0.tar.gz</code> 下载</p>
+            <br>
+
+            <h3>安装</h3>
+            <br>
+            <ul>
+                <li>将安装包上传到云服务器上</li>
+                <li>指定一个存放目录并 cd</li>
+                <li>输入 <code>tar -zxvf falcon-agent-5.1.0.tar.gz</code></li>
+                <li><code>cd agent</code></li>
+                <li><code>./control start</code> 等待安装完毕即可</li>
+                <li><code>./control tail</code>可查看运行情况</li>
+                <li><code>netstat -tnlp</code> 可查看端口情况(falcon开头的都是相关进程，必须要有)</li>
+                <li><code>/sbin/iptables -A INPUT -s 222.73.243.55 -p tcp --dport 1988 -j ACCEPT</code> 开启防火墙设置</li>
+            </ul>
+            <br>
+
+            <h3>更多教程</h3>
+            <br>
+
+            <p>请查看 <a href="http://book.open-falcon.com/zh/quick_install/graph_components.html" target="_blank">Open-Falcon使用说明</a>
+            </p>
+
+        </div>
+    </div>
+</div>

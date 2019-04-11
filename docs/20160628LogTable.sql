@@ -1,0 +1,1 @@
+ALTER TABLE `operation_log` ADD COLUMN `pid` INT(11) NULL AFTER `firm_id`;

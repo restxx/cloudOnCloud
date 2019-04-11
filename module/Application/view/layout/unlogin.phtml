@@ -1,0 +1,61 @@
+<?php
+$this->headTitle(' - 云上云', 'APPEND');
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <?= $this->headTitle() ?>
+
+    <link rel="stylesheet" type="text/css" href="/towcloud/css/new/css.css">
+    <?php
+    if ($this->cssStyles && is_array($this->cssStyles)) {
+        foreach ($this->cssStyles as $cssPath) {
+            $this->headLink()
+                ->prependStylesheet($this->basePath() . $cssPath);
+        }
+        echo $this->headLink();
+    }
+    ?>
+</head>
+<body>
+<div class="top">
+    <div class="w1000">
+        <h1><a href=""><img src="/towcloud/images/new/logo.png" alt="云上云"></a></h1>
+        <dl>
+            <dl>
+                <dt>
+                    <a href="/">首页</a>
+                    <a href="/submit-resource">加入云联盟</a>
+                    <a href="/manager">采购云资源</a>
+                    <a href="/resource">管理云资源</a>
+                    <a href="/about">关于我们</a>
+                </dt>
+
+                <dd>
+                    <?php
+                    if ($this->account) {
+                        ?>
+                        <a><?=$this->account['username']?></a>
+                        /
+                        <a href="/login-out">注销</a>
+                        <!--<a style="border: 1px solid #cccccc;" href="/manager" target="_blank">主机管理</a>-->
+                    <?php
+                    } else {
+                        ?>
+                        <a href="/login"
+                           target="_blank">登录</a>
+                        /
+                        <a href="/register">注册</a>
+                    <?php
+                    }
+                    ?>
+                </dd>
+            </dl>
+
+        </dl>
+    </div>
+</div>
+<?php echo $this->content; ?>
+</body>
+</html>

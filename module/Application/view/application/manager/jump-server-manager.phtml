@@ -1,0 +1,179 @@
+
+<?php
+if (!$this->jsInfo) {
+    ?>
+    <div class="alert alert-info" role="alert">
+        <b>堡垒机功能介绍：</b><br>
+        1. 根据IP无密码连接服务器<br>
+        2. 操作日志审计
+    </div>
+    <div class="alert alert-success" id="register-js">
+        <button class="btn btn-primary">注册堡垒机</button>
+    </div>
+<?php
+} else {
+    ?>
+    <div class="alert alert-info" role="alert">
+        <b>堡垒机使用方法：</b><br>
+        1. 使用Xshell,secureCRT等工具连接: ssh 用户名@222.73.243.43，密码为如下密码.<br>
+        2. 将公钥加入被管理服务器 /root/.ssh/authorized_keys 文件中, 并确保防火墙22端口对222.73.243.43开放.
+    </div>
+    <table class="table js-server-manager table-bordered">
+        <tr>
+            <td>公钥</td>
+            <td><?= ($this->jsInfo && $this->jsInfo['public_key']) ? $this->jsInfo['public_key'] : '<code><a href="">1分钟后请刷新</a></code>' ?></td>
+        </tr>
+        <tr>
+            <td>堡垒机密码</td>
+            <td><?= ($this->jsInfo && $this->jsInfo['password']) ? $this->jsInfo['password'] : '未就绪' ?></td>
+        </tr>
+    </table>
+    <table id="js-bind-hosts" class="display" cellspacing="0" width="100%">
+        <thead>
+        <tr>
+            <th>厂商</th>
+            <th>主机ID</th>
+            <th>主机名</th>
+            <th>主机公网IP</th>
+            <th>主机用户名</th>
+            <th>主机端口</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+    </table>
+<?php
+}
+?>
+
+<script>
+    $(function () {
+        $("#register-js").click(function () {
+            $.post(
+                '',
+                {},
+                function (ret) {
+                    if (ret.code == 0) {
+                        alert('注册成功');
+                        location.reload();
+                    } else if (ret.error) {
+                        alert(ret.error);
+                    } else {
+                        alert('未知错误');
+                    }
+                },
+                'json'
+            );
+        });
+        var table = $('#js-bind-hosts').DataTable({
+            "dom": '<"toolbar">frtip',
+            "processing": true,
+            "serverSide": true,
+            'ordering': false,
+            searching: false,
+            scrollX: true,
+            //scrollY:300,
+            scrollCollapse: false,
+            searchDelay: 1000,
+            pageLength: 10,
+            fixedColumns: {
+                leftColumns: 0,
+                rightColumns: 1
+            },
+            "ajax": {
+                url: '/jump-server-bind-list',
+                type: 'POST',
+                data: function (d) {
+                    /*d.p = $('.project').attr('data-value');
+                     d.r = $('.region').attr('data-value');*/
+                }
+            },
+            "language": {
+                "url": "/DataTables-1.10.11/media/languages/chinese.json"
+                //searchPlaceholder: '主机名或IP(IP,IP,IP...)'
+            },
+            'columns': [
+                {
+                    'data': 'firm',
+                    render: function (data, type, full, meta) {
+                        return data;
+                    },
+                    bSortable: false
+                },
+                {
+                    'data': 'host_id',
+                    render: function (data, type, full, meta) {
+                        return data;
+                    },
+                    bSortable: false,
+                    "searchable": false
+                },
+                {
+                    'data': 'host_name',
+                    render: function (data, type, full, meta) {
+                        return data;
+                    },
+                    bSortable: false,
+                    "searchable": false
+                },
+                {
+                    "data": 'host_ip',
+                    render: function (data, type, full, meta) {
+                        return data;
+                    },
+                    "searchable": false
+                },
+                {
+                    "data": 'host_username',
+                    render: function (data, type, full, meta) {
+                        return data;
+                    },
+                    "searchable": false
+                },
+                {
+                    "data": 'host_port',
+                    render: function (data, type, full, meta) {
+                        return data;
+                    },
+                    "searchable": false
+                },
+                {
+                    "data": 'id',
+                    render: function (data, type, full, meta) {
+                        return '<span><a href="javascript:void(0)" class="item-delete" data-value="' + data + '">删除</a></span>';
+                    },
+                    "searchable": false
+                }
+            ],
+            drawCallback: function (settings) {
+                var api = this.api();
+                api.$('tr').find('.item-delete').unbind().click(function(){
+                    var id = $(this).attr('data-value');
+                    confirmModal('确认删除?', function(){
+                        $.get(
+                            '/jump-server-bind-list',
+                            {
+                                id : id
+                            },
+                            function(ret) {
+                                if(ret.code == 0)
+                                {
+                                    alert('删除成功');
+                                    api.ajax.reload(function (json) {
+                                    }, false);
+                                } else if(ret.error)
+                                {
+                                    alert(ret.error);
+                                } else {
+                                    alert('未知错误');
+                                }
+                            },
+                            'json'
+                        );
+                    });
+
+
+                });
+            }
+        });
+    });
+</script>

@@ -1,0 +1,156 @@
+<div class="manage-area-nav">
+    <h2><?= $this->layout()->menus[$this->layout()->id] ?></h2>
+
+    <div class="list project"></div>
+    <div class="list region"></div>
+    <!--<a class="unbind" href="javascript:void(0)">解除绑定</a>-->
+</div>
+<div class="cor-content alert alert-info">
+    子账号用于同组成员协同工作，需对其分配项目权限才可使用.
+</div>
+<br>
+<div class="cor-content">
+    <form id="addSubUser">
+        <div class="form-group">
+            <label for="pUsername">子账号用户名</label>
+            <input type="text" class="form-control" id="pUsername" name="username" maxlength="10" placeholder="用户名(6-10位的下划线、数字和字母)" autocomplete="off">
+        </div>
+        <!--<div class="form-group">
+            <label for="pNickname">昵称</label>
+            <input type="text" class="form-control" id="pNickname" placeholder="请输入昵称" autocomplete="off">
+        </div>-->
+
+        <div class="form-group">
+            <label for="pPassword">子账号密码</label>
+            <input type="password" class="form-control" id="pPassword" name="password" placeholder="密码,8-20位大小写字母、数字和特殊字符(#$%^&*@!)" maxlength="20">
+        </div>
+        <div class="form-group">
+            <label for="pcPassword">确认密码</label>
+            <input type="password" class="form-control" id="pcPassword" placeholder="请再次输入子账号密码">
+        </div>
+        <div class="form-group">
+            <label for="pMobile">手机号</label>
+            <input type="text" class="form-control" id="pMobile" name="mobile" placeholder="请输入手机号" autocomplete="off">
+        </div>
+        <div class="form-group">
+            <label for="pEmail">Email</label>
+            <input type="text" class="form-control" id="pEMail" name="email" placeholder="请输入Email名" autocomplete="off">
+        </div>
+        <button type="button" class="btn btn-default" id="btnCreate">创建</button>
+    </form>
+    <br>
+    <div class="dataTable-container">
+        <table id="subUsers" class="display" cellspacing="0" width="100%">
+            <thead>
+            <tr>
+                <th>用户名</th>
+                <th>手机号</th>
+                <th>邮箱地址</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<script type="application/javascript">
+    $(function(){
+        var tableDataURL = "/corp/get-sub-users";
+        var table = $('#subUsers').DataTable({
+            dom: '<"toolbar">frtip',
+            processing: true,
+            serverSide: true,
+            ordering: false,
+            searching: false,
+            scrollX: true,
+            //scrollY:300,
+            scrollCollapse: false,
+            searchDelay: 1000,
+            pageLength: 10,
+            fixedColumns: {
+                leftColumns: 0,
+                rightColumns: 1
+            },
+            ajax: {
+                url: tableDataURL,
+                type: 'POST',
+                data:function(d){/*
+                 d.p = $('.project').attr('data-value');
+                 d.r = $('.region').attr('data-value');*/
+                }
+            },
+            language: {
+                url: "/DataTables-1.10.11/media/languages/chinese.json",
+                //searchPlaceholder: '主机名或内网IP(IP,IP,IP...)'
+            },
+            columns: [
+                {
+                    data: 'username',
+                    bSortable: false
+                },
+                {
+                    data: 'mobile',
+                    bSortable: false,
+                    searchable: false
+                },
+                {
+                    data: 'email',
+                    searchable: false
+                },
+                {
+                    sClass: "text-center",
+                    data: 'uid',
+                    render: function (data, type, full, meta) {
+                        return '<a class="btnDel" href="javascript:void(0);" data-id="' + data + '" data-name="' + full.username + '">删除</a>';
+                    },
+                    bSortable: false,
+                    searchable: false
+                }
+            ],
+            drawCallback: function (settings) {
+                var api = this.api();
+                api.$('.btnDel').click(function(){
+                    var btn  = $(this);
+                    var uid  = btn.attr('data-id');
+                    var name = btn.attr('data-name');
+                    window.confirmModal('确认删除子账号 : <b>' + name +'</b> ?', function(){
+                        $.post(
+                            '/corp/del-sub-user',
+                            {
+                                uid : uid
+                            },
+                            function (ret){
+                                if(ret.code == 0)
+                                {
+                                    alert('删除账号成功');
+                                    $('#subUsers').dataTable().api().ajax.reload(function (json) {}, false);
+                                } else if(ret.error) {
+                                    alert(ret.error);
+                                }
+                            },
+                            'json'
+                        );
+                    });
+                })
+            }
+        });
+
+        $("#btnCreate").click(function(){
+            var form = $('#addSubUser');
+            $.post(
+                '/corp/add-sub-user',
+                form.serialize(),
+                function(ret){
+                    if(ret.code  == 0) {
+                        alert('添加成功');
+                        form.find('input').val('');
+                        table.ajax.reload(function(json){}, false);
+                    } else if (ret.error) {
+                        alert(ret.error);
+                    }
+                },
+                'json'
+            );
+        });
+    });
+</script>

@@ -1,0 +1,53 @@
+$("#monitorDetail").scrollTop();
+
+
+$('#container').highcharts({
+    		chart: {
+            type: 'line',
+            margin: [40, 50, 50, 50]
+        },
+        loading: {
+            hideDuration: 1000,
+            showDuration: 1000
+        },
+        title: {
+        		text: '' 
+        },
+        credits: {
+        		enabled: false
+        },
+        legend: {
+            enabled: false
+        },
+        xAxis: {
+        		lineWidth: 1,
+          	lineColor:"#D8D8D8",
+            categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        },
+        yAxis: {
+        		title: {
+                enabled: false,
+            },
+            lineWidth: 1,
+            lineColor:"#D8D8D8"
+        },
+        series: [{
+            data: [29.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4],
+            color: '#FF7A22'
+        }],
+        tooltip: {
+            enabled: true,
+            formatter: function() {
+                return this.x +': '+ this.y;
+            }
+        },
+        plotOptions: {
+            series: {
+                marker: {
+                    radius: 1,
+                },
+               
+                
+            }
+        },
+    });

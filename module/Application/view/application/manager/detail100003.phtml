@@ -1,0 +1,778 @@
+<div class="manage-area-detail-nav">
+    <a class="to-host-list left-nav" href="/control/<?= $this->layout()->fid ?>">
+        <span class="glyphicon glyphicon-chevron-left"></span>
+        云主机
+    </a>
+    <span class="line-icon">|</span>
+    <span class="left-nav-id"><?= $this->id ?></span>
+</div>
+<style type="text/css">
+    .lijun_tab {
+        float: left;
+        padding: 0 10px;
+        color: #454a51;
+        text-align: center;
+        cursor: pointer;
+        border-radius: 3px;
+    }
+
+    .lijun_tab_cur {
+        color: #fff !important;
+        background: #0070cc !important;
+
+    }
+
+    .lijun_grid {
+        padding: 30px 0;
+    }
+
+    .lijun_tablist {
+        float: left;
+        line-height: 27px;
+        font-size: 12px;
+        margin-right: 4px;
+        opacity: 1;
+    }
+
+    .lijun_table {
+        display: table;
+        table-layout: fixed;
+        width: 100%;
+        margin-top: 50px;
+        margin-bottom: 26px;
+        border-bottom: 1px solid #E6EBF2;
+    }
+
+    .lijun_table_caption {
+        display: table-caption;
+        margin-bottom: 14px;
+    }
+
+    .lijun_table_row {
+        display: table-row
+    }
+
+    .lijun_table_cell {
+        display: table-cell
+    }
+
+    .lijun_chart_main {
+        margin-top: 10px;
+        background-color: #fdfdfd;
+        font-size: 0;
+        position: relative;
+    }
+
+    .lijun_chart_title {
+        font-size: 14px;
+    }
+
+    .lijun_gap_cell {
+        width: 80px;
+        display: table-cell;
+        padding-bottom: 20px;
+    }
+
+    .lijun_chart_box {
+        height: 160px;
+        font-size: 14px
+    }
+
+</style>
+<div class="detail-tab">
+<ul class="tab-list">
+    <li class="tab-title-cur"><a href="javascript:void(0)">参数</a></li>
+    <li><a href="javascript:void(0)">监控</a></li>
+    <li><a href="javascript:void(0)">警报</a></li>
+    <li><a href="javascript:void(0)">测速</a></li>
+    <li class="operation-log"><a href="javascript:void(0)">操作记录</a></li>
+</ul>
+<div class="tab-page tab-content-cur">
+    <?php
+    foreach ($this->data as $head => $values) {
+        if (in_array($head, ["monitor", "wIp"])) continue;
+        ?>
+        <div class="info-box">
+            <div class="info-head"><h3><?= $head ?></h3></div>
+            <div class="info-body">
+                <ul style="display: block" class="info-body-list">
+                    <?php foreach ($values as $name => $value) { ?>
+                        <li><span class="info-name"><?= $name ?></span><span class="info-value"><?= $value ?></span>
+                        </li>
+                    <?php } ?>
+
+                </ul>
+            </div>
+        </div>
+    <?php
+    }
+    ?>
+
+</div>
+<div class="tab-page" id="monitorDetail">
+    <?php if (isset($this->data['monitor'])) { ?>
+        <div class="lijun_grid">
+            <div class="lijun_tablist">
+                    <span tabindex="0" class="lijun_tab lijun_tab_cur"
+                          start="<?= date("Y-m-d H:i:s", strtotime("-1 hour")) ?>" end="now">近1小时</span>
+                    <span tabindex="1" class="lijun_tab" start="<?= date("Y-m-d") ?>"
+                          end="now">今天</span>
+                    <span tabindex="2" class="lijun_tab" start="<?= date("Y-m-d", strtotime("-1 day")) ?>"
+                          end="<?= date("Y-m-d") ?>">昨天</span>
+                    <span tabindex="3" class="lijun_tab" start="<?= date("Y-m-d", strtotime("-7 day")) ?>"
+                          end="<?= date("Y-m-d") ?>">近7天</span>
+                    <span tabindex="4" class="lijun_tab" start="<?= date("Y-m-d", strtotime("-14 day")) ?>"
+                          end="<?= date("Y-m-d") ?>">近14天</span>
+
+                <input type="text" readonly
+                       style="width: 220px;height: 27px;background-color: #ffffff;border-radius: 3px;"
+                       name="reservation" id="reservation"
+                       class="form-control"
+                       value="<?= date("Y-m-d H:i:s", strtotime("-1 hour")) ?> - now"/>
+
+            </div>
+
+            <?php foreach ($this->data['monitor'] as $rows) { ?>
+                <!--        监控模板 begin-->
+                <div class="lijun_table">
+                    <?php if (isset($rows['caption'])) { ?>
+                        <h3 class="lijun_table_caption"><?= $rows['caption'] ?></h3>
+                    <?php } ?>
+                    <div class="lijun_table_row">
+                        <div class="lijun_table_cell">
+                            <h4 class="lijun_chart_title"><?= $rows[0]['title'] ?></h4>
+
+                            <div class="lijun_chart_main">
+                                <div class="lijun_chart_box" id="<?= $rows[0]['id'] ?>"></div>
+                            </div>
+                        </div>
+
+                        <?php if (isset($rows[1])) { ?>
+                            <div class="lijun_gap_cell"></div>
+
+                            <div class="lijun_table_cell">
+                                <h4 class="lijun_chart_title"><?= $rows[1]['title'] ?></h4>
+
+                                <div class="lijun_chart_main">
+                                    <div class="lijun_chart_box" id="<?= $rows[1]['id'] ?>"></div>
+                                </div>
+                            </div>
+                        <?php } ?>
+                    </div>
+                </div>
+            <?php } ?>
+        </div>
+    <?php } ?>
+</div>
+<!--        报警模板 end-->
+<div class="tab-page">
+<div class="box-inner" style="margin-top: 20px;">
+<div class="box-content">
+    <div class="alert alert-info">
+        <p><strong>使用须知</strong>:使用前请先自主安装Agent.
+            <code style="cursor: pointer;" id="readAlertDownload">阅读安装流程</code>
+            &nbsp<a href="http://cdn.mztgame.ztgame.com.cn/package/falcon-agent-5.1.0.tar.gz" target="_blank"
+                    style="text-decoration: none;">
+                <code style="cursor: pointer;">点击此处下载Agent</code>
+            </a>
+        </p>
+
+        <p><strong>功能说明</strong>:
+            1.需要开启警报，展开策略管理 2.需要添加接收报警邮件用户,展开报警用户管理 3.其他功能，暂无
+        </p>
+    </div>
+</div>
+
+<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+<div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="headingOne">
+        <h4 class="panel-title">
+
+            <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne"
+               aria-expanded="false"
+               aria-controls="collapseOne">
+                策略管理
+            </a>
+        </h4>
+    </div>
+    <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+        <div class="panel-body">
+            <div class="pull-right">
+                <a class="btn btn-primary btn-sm" id="addAlert">
+                    <span class="glyphicon-plus">&nbsp启用报警</span>
+                </a>
+            </div>
+            <div style="line-height: 35px;">
+                max: 最大报警次数 P：报警级别（&lt;3: 既发短信也发邮件 &gt;=3: 只发邮件） 生效时间，默认全天生效
+            </div>
+        </div>
+        <table class="table table-hover table-bordered table-striped" style="margin-bottom: 0px;">
+            <thead>
+            <tr>
+                <th>规则</th>
+                <th>描述</th>
+                <th>max</th>
+                <th>P</th>
+            </tr>
+            </thead>
+            <tbody>
+
+            <tr>
+                <td>
+                    agent.alive
+                </td>
+                <td>
+                    Agent is unreachable for 3 minutes
+                </td>
+                <td>1</td>
+                <td>1</td>
+            </tr>
+
+            <tr>
+                <td>
+                    cpu.idle
+                </td>
+                <td>
+                    cpu idle小于40%
+                </td>
+                <td>1</td>
+                <td>1</td>
+            </tr>
+
+            <tr>
+                <td>
+                    cpu.iowait
+                </td>
+                <td>
+                    Disk I/O is overloaded
+                </td>
+                <td>1</td>
+                <td>3</td>
+            </tr>
+
+            <tr>
+                <td>
+                    df.bytes.free.percent/mount=/
+                </td>
+                <td>
+                    Free disk space is less than 20% on volume /
+                </td>
+                <td>1</td>
+                <td>3</td>
+            </tr>
+
+            <tr>
+                <td>
+                    df.bytes.free.percent/mount=/boot
+                </td>
+                <td>
+                    Free disk space is less than 20% on volume /boot
+                </td>
+                <td>1</td>
+                <td>3</td>
+            </tr>
+
+            <tr>
+                <td>
+                    df.inodes.free.percent/mount=/
+                </td>
+                <td>
+                    Free inodes is less than 20% on volume /
+                </td>
+                <td>1</td>
+                <td>3</td>
+            </tr>
+
+            <tr>
+                <td>
+                    df.inodes.free.percent/mount=/boot
+                </td>
+                <td>
+                    Free inodes is less than 20% on volume /boot
+                </td>
+                <td>1</td>
+                <td>3</td>
+            </tr>
+
+            <tr>
+                <td>
+                    kernel.maxfiles
+                </td>
+                <td>
+                    Configured max number of opened files is too low
+                </td>
+                <td>1</td>
+                <td>4</td>
+            </tr>
+
+            <tr>
+                <td>
+                    load.5min
+                </td>
+                <td>
+                    Processor load is too high
+                </td>
+                <td>1</td>
+                <td>3</td>
+            </tr>
+
+            <tr>
+                <td>
+                    mem.memfree
+                </td>
+                <td>
+                    Lack of available memory on server
+                </td>
+                <td>1</td>
+                <td>3</td>
+            </tr>
+
+            <tr>
+                <td>
+                    mem.swapfree.percent
+                </td>
+                <td>
+                    Lack of free swap space
+                </td>
+                <td>1</td>
+                <td>3</td>
+            </tr>
+
+            <tr>
+                <td>
+                    net.if.in.bytes
+                </td>
+                <td>
+                    进网卡流量突然上升超过500Mb
+                </td>
+                <td>1</td>
+                <td>0</td>
+            </tr>
+
+            <tr>
+                <td>
+                    net.if.out.bytes
+                </td>
+                <td>
+                    出网卡流量突然上升超过500Mb
+                </td>
+                <td>1</td>
+                <td>0</td>
+            </tr>
+
+            <tr>
+                <td>
+                    proc.mem
+                </td>
+                <td>
+                    当前进程占用内存大于2G
+                </td>
+                <td>1</td>
+                <td>3</td>
+            </tr>
+
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="headingTwo">
+        <h4 class="panel-title">
+            <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo"
+               aria-expanded="false" aria-controls="collapseTwo">
+                报警用户管理
+            </a>
+        </h4>
+    </div>
+    <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+        <div class="panel-body">
+            <div class="pull-right">
+                <a class="btn btn-primary btn-sm alertUserAdd">
+                    <span>新增用户</span>
+                </a>
+                <a class="btn btn-primary btn-sm alertUserEdit">
+                    <span>编辑用户</span>
+                </a>
+            </div>
+            <div style="line-height: 35px;">
+                此列表显示的是目前有接收邮件或者短信警报权限的账户,第一次启用必须新增一个账户
+            </div>
+        </div>
+        <table class="table table-hover table-bordered table-striped" style="margin-bottom: 0px;"
+               id="testSpeed">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>账号</th>
+                <th>中文名</th>
+                <th>邮箱</th>
+                <th>手机</th>
+                <th>QQ</th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="headingThree">
+        <h4 class="panel-title">
+            <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseThree"
+               aria-expanded="false" aria-controls="collapseThree">
+                其他功能
+            </a>
+        </h4>
+    </div>
+    <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+        <div class="panel-body">
+            其余功能敬请期待
+        </div>
+    </div>
+</div>
+</div>
+</div>
+</div>
+<div class="tab-page">
+    <!--  测速结果列表 end-->
+    <div class="box-inner" style="margin-top: 20px;">
+        <div class="box-content">
+            <div class="alert alert-info">
+                <p><strong>使用须知:</strong>&nbsp请确保测试过程中,被测试服务器 icmp 对公网全完开放.如发现所有监测点丢包率都为100%,请检查被测服务器防火墙规则.</p>
+                <p><strong>操作流程:</strong>&nbsp选择测试时间,点击按钮之后等待测试结果即可.</p>
+            </div>
+        </div>
+        <div class="box-content">
+            <div class="panel panel-default" style="margin-top: 10px;">
+                <div class="panel-heading">测试报表</div>
+                <div class="panel-body">
+                    <div class="pull-right">
+                        <ul class="list-inline">
+                            <li>选择测试时间</li>
+                            <li>
+                                <select id="testTime" data-rel="chosen" style="width: 100px;">
+                                    <option value="10">10秒</option>
+                                    <option value="30">30秒</option>
+                                    <option value="60">60秒</option>
+                                </select>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary" id="doTestSpeed">
+                                    <span>开始测试</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div style="line-height: 35px;">
+                        主机: <code><?= $this->id ?></code> 地区：<code><?= $this->rid ?></code>
+                    </div>
+                </div>
+                <table class="table table-hover table-bordered table-striped" style="margin-bottom: 0px;"
+                       id="testSpeed">
+                    <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th>网络类型</th>
+                        <th>IP</th>
+                        <th>丢包率</th>
+                        <th>最小值</th>
+                        <th>最大值</th>
+                        <th>平均值</th>
+                        <th>偏差值</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="tab-page">
+    <br>
+    <table id="host_operation_log" class="display" cellspacing="0" width="100%">
+        <thead>
+        <tr>
+            <th>操作用户</th>
+            <th>操作类型</th>
+            <th>操作结果</th>
+            <th>操作时间</th>
+        </tr>
+        </thead>
+    </table>
+</div>
+</div>
+
+<script>
+    var lock = [],
+        qtype = 0,
+        monitorData = <?=json_encode(isset($this->data['monitor'])?$this->data['monitor']:[])?>;
+
+    $(function () {
+        $('.detail-tab .tab-list li').click(function () {
+            $('.detail-tab .tab-list li').removeClass('tab-title-cur');
+            var me = $(this);
+            me.addClass('tab-title-cur');
+            $('.detail-tab .tab-page').removeClass('tab-content-cur');
+            var index = me.index();
+            if (me.hasClass('operation-log')) {
+                initLogTable('<?=$this->id?>');
+            }
+            $('.detail-tab .tab-page:eq(' + index + ')').addClass('tab-content-cur');
+
+            if (index == 1 && lock.indexOf("line0,1") < 0) {
+                showChart(0);
+                showChart(1);
+                lock.push("line0,1");
+            }
+        });
+
+        $(".lijun_tab").on("click", function () {
+            $(this).siblings().removeClass("lijun_tab_cur");
+            $(this).addClass("lijun_tab_cur");
+
+            qtype = $(this).index();
+            lock = [];
+
+            $("#reservation").val($(this).attr("start") + " - " + $(this).attr("end"));
+            $("#monitorDetail").scroll();
+
+        });
+
+        $("#readAlertDownload").on("click", function () {
+            $.get("/download-alert-agent", function (html) {
+                show_msg(html);
+            });
+        });
+
+        $("#addAlert").bind("click", function () {
+
+            loading('show');
+            $.post("/add-alert-host/<?=$this->layout()->fid?>/<?= $this->id ?>/<?= $this->rid ?>", null, function (data) {
+                loading();
+                if (data.code == 0) {
+                    alert(data.msg);
+                }
+            });
+
+        });
+
+        $('#collapseTwo').on('show.bs.collapse', function () {
+            getAlertUser($(this).find("tbody:first"));
+        });
+
+        function getAlertUser(dom) {
+            dom.empty().html("<span>数据获取中，请稍后.....</span>");
+            loading('show');
+            $.post("/get-alert-group", null, function (data) {
+                loading();
+                var template = "<tr align='center'><td>#ID#</td><td>#NAME#</td><td>#CNAME#</td><td>#EMAIL#</td><td>#PHONE#</td><td>#QQ#</td></tr>",
+                    tbody = dom;
+                dom.empty();
+                $.each(data.data, function (k, v) {
+                    var dom = template.replace("#ID#", v.id)
+                        .replace("#NAME#", v.name)
+                        .replace("#CNAME#", v.cnname)
+                        .replace("#EMAIL#", v.email)
+                        .replace("#PHONE#", v.phone)
+                        .replace("#QQ#", v.qq);
+                    tbody.append(dom);
+                });
+            });
+        }
+
+        $("#collapseTwo .alertUserAdd").off("click").on("click", function () {
+
+            var dom = $("#modal_editAlertUser");
+            dom.find(".panel-heading .panel-title").text("新增用户");
+            dom.modal({
+                backdrop: false,
+                keyboard: false
+            });
+
+            dom.find("#btnOptAlertUser").off('click').on('click', function () {
+                $.post("/opt-alert-user/1", $("#form_optAlertUser").serialize(), function (data) {
+                    alert(data.msg);
+                    if (data.code == 0) {
+                        dom.modal('hide');
+                        getAlertUser($('#collapseTwo').find("tbody:first"));
+                    }
+                });
+            });
+        });
+
+        $("#collapseTwo .alertUserEdit").off("click").on("click", function () {
+            var dom = $("#modal_editAlertUser");
+            dom.find(".panel-heading .panel-title").text("编辑用户");
+            dom.modal({
+                backdrop: false,
+                keyboard: false
+            });
+            dom.find("#btnOptAlertUser").off('click').on('click', function () {
+                $.post("/opt-alert-user/2", $("#form_optAlertUser").serialize(), function (data) {
+                    alert(data.msg);
+                    if (data.code == 0) {
+                        dom.modal('hide');
+                        getAlertUser($('#collapseTwo').find("tbody:first"));
+                    }
+                });
+            });
+        });
+
+        $("#doTestSpeed").on("click", function () {
+            var ip = "<?=isset($this->data['主机信息']['公网IP'])?$this->data['主机信息']['公网IP']:'';?>";
+            if (ip.length > 0) {
+                loading('show');
+                $.post("/do-test-speed", {ip: ip, time: $("#testTime").val()}, function (data) {
+                    loading();
+                    if (data.code == 0) {
+                        var template = "<tr align='center' ><td>#No#</td><td>#NETTYPE#</td><td>#IP#</td><td>#LOSS#</td><td>#MIN#</td><td>#MAX#</td><td>#AVG#</td><td>#MDEV#</td></tr>",
+                            tbody = $('#testSpeed tbody');
+
+                        tbody.empty();
+
+                        $.each(data.data, function (k, v) {
+
+                            var dom = template.replace("#No#", k + 1)
+                                .replace("#NETTYPE#", v.nettype)
+                                .replace("#IP#", v.ip)
+                                .replace("#LOSS#", v.loss)
+                                .replace("#MIN#", v.min)
+                                .replace("#MAX#", v.max)
+                                .replace("#AVG#", v.avg)
+                                .replace("#MDEV#", v.mdev);
+
+                            tbody.append(dom);
+                        });
+                    } else {
+                        setTimeout(function () {
+                            loading();
+                            alert(data.msg);
+                        }, 2000);
+
+                    }
+                });
+            } else {
+                alert("获取主机失败");
+            }
+        });
+
+        $(".right").on("scroll", function () {
+
+            var top = $(this).scrollTop();
+
+            if (top <= 150 && top >= 0 && lock.indexOf("line0,1") < 0) {
+                showChart(0);
+                showChart(1);
+                lock.push("line0,1");
+            }
+
+            if (top <= 300 && top > 150 && lock.indexOf("line2") < 0) {
+                showChart(2);
+                lock.push("line2");
+            }
+
+            if (top <= 450 && top > 300 && lock.indexOf("line3") < 0) {
+                showChart(3);
+                lock.push("line3");
+            }
+
+            if (top <= 600 && top > 450 && lock.indexOf("line4") < 0) {
+                showChart(4);
+                lock.push("line4");
+            }
+
+            if (top <= 750 && top > 600 && lock.indexOf("line5") < 0) {
+                showChart(5);
+                lock.push("line5");
+            }
+
+            if (top <= 900 && top > 750 && lock.indexOf("line6") < 0) {
+                showChart(6);
+                lock.push("line6");
+            }
+
+            if (top <= 1050 && top > 900 && lock.indexOf("line7") < 0) {
+                showChart(7);
+                lock.push("line7");
+            }
+
+            if (top <= 1200 && top > 1050 && lock.indexOf("line8") < 0) {
+                showChart(8);
+                lock.push("line8");
+            }
+        });
+
+        var options = {
+            chart: {
+                type: 'line',
+                margin: [10, 0, 50, 50]
+            },
+            loading: {
+                hideDuration: 1000,
+                showDuration: 1000
+            },
+            title: {
+                text: ''
+            },
+            credits: {
+                enabled: false
+            },
+            legend: {
+                enabled: false
+            },
+            yAxis: {
+                title: {
+                    enabled: false
+                },
+                lineWidth: 1,
+                lineColor: "#D8D8D8"
+            },
+            tooltip: {
+                enabled: true,
+                formatter: function () {
+                    return "时间:" + this.x + "<br>数值:" + this.y;
+                }
+            },
+            series: [
+                {
+                    data: [],
+                    color: '#FF7A22'
+                }
+            ],
+            xAxis: {
+                lineWidth: 1,
+                lineColor: "#D8D8D8",
+                categories: []
+            },
+            plotOptions: {
+                series: {
+                    marker: {
+                        radius: 1
+                    }
+                }
+            }
+        };
+
+        function showChart(index) {
+            var line = monitorData[index];
+
+            if (line) {
+                $.each(line, function (k, v) {
+                    if (!isNaN(k)) {
+                        dom = $("#" + v.id);
+                        dom.highcharts(options);
+                        var chart = dom.highcharts();
+
+                        chart.showLoading();
+                        $.post("/monitor-data/<?=$this->layout()->fid?>", {hid: '<?= $this->id ?>', rid: '<?= $this->rid ?>', mid: v.id, qtype: qtype}, function (data) {
+                            chart.series[0].setData(data.points);
+                            chart.xAxis[0].setCategories(data.categories);
+                            chart.hideLoading();
+                        });
+                    }
+                });
+            }
+        }
+    })
+</script>

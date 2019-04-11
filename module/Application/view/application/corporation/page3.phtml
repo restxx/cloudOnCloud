@@ -1,0 +1,123 @@
+<div class="manage-area-nav">
+    <h2><?= $this->layout()->menus[$this->layout()->id] ?></h2>
+
+    <div class="list project"></div>
+    <div class="list region"></div>
+    <!--<a class="unbind" href="javascript:void(0)">解除绑定</a>-->
+</div>
+<div class="cor-content alert alert-info">
+    需先关联<a href="/cor-index/4"><code>项目映射关系</code></a>才可分配项目权限。已分配的项目在下拉列表中呈现灰色不可选状态。
+</div>
+<br>
+<div class="cor-content">
+    <form>
+        <div class="form-group">
+            <label for="pUsername">子账号用户名</label>
+            <select class="form-control" id="pUsername">
+                <option value="0">选择子账号...</option>
+                <?php
+                foreach($this->subUsers as $item){
+                    ?>
+                    <option value="<?=$item['uid']?>"><?=$item['username']?></option>
+                <?php
+                }
+                ?>
+            </select>
+            <p>当前项目权限:<code id="permList">无</code></p>
+        </div>
+        <div class="form-group">
+            <label for="pProject">项目权限</label>
+            <select class="form-control" id="pProject">
+                <option value="0">选择项目...</option>
+                <?php
+                foreach($this->projects as $id => $name){
+                ?>
+                <option value="<?=$id?>"><?=$name?></option>
+                <?php
+                }
+                ?>
+            </select>
+        </div>
+        <button type="button" class="btn btn-default" id="assign">分配</button>
+    </form>
+</div>
+<script type="application/javascript">
+    $(function(){
+        $("#assign").click(function(){
+            var uid = $("#pUsername").val();
+            var pid = $("#pProject").val();
+
+            if(!uid)
+            {
+                alert('请选择账号');
+                return false;
+            }
+            if(!pid)
+            {
+                alert('请选择项目');
+                return false;
+            }
+            $.post(
+                '/corp/bind-to-user',
+                {
+                    uid : uid,
+                    pid : pid
+                },
+                function(ret){
+                    if(ret.code == 0) {
+                        alert('分配成功');
+                    } else if(ret.error)
+                    {
+                        alert(ret.error);
+                    }
+                },
+                'json'
+            );
+        });
+        $("#pUsername").change(function(){
+            var uid = this.value;
+            if(uid == 0)
+            {
+                return false;
+            }
+            $.get(
+                '/corp/get-permission-by-uid',
+                {
+                    uid:uid
+                },
+                function(ret){
+                    if(ret.code == 0 && ret.data)
+                    {
+                        var str = '';
+                        var ids = [];
+                        $.each(ret.data,function(i,n){
+                            if(str)
+                            {
+                                str +=',' + n;
+                            } else {
+                                str = n;
+                            }
+                            ids.push(i);
+                        });
+                        if(str) {
+                            $('#permList').html(str);
+                        } else {
+                            $('#permList').html('无');
+                        }
+                        var options = $('#pProject option')
+                        for(var t=0; t< options.length;t++)
+                        {
+                            if(ids.indexOf(options[t].value) != -1)
+                            {
+                                options[t].disabled = true;
+                            } else {
+                                options[t].disabled = false;
+                            }
+                        }
+                    }
+                },
+                'json'
+            );
+        });
+    });
+</script>
