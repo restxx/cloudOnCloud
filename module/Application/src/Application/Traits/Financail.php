@@ -497,8 +497,7 @@ trait Financail
         $filePath =
             PHP_OS == "WINNT" ? "data/" . $filename : "/tmp/" . $filename;
 
-        $targetFile = getcwd()."/data/report/cloud_bill_info." . date("Y.m", strtotime("-2 month")) . ".log";
-
+        $targetFile = getcwd()."/data/report/cloud_bill_info." . date("Y.m", strtotime("-1 month")) . ".log";
         if (!is_file($targetFile)) {
             if (!is_file($filePath)) {
                 throw new \Exception('获取星云物理机数据失败', -2);

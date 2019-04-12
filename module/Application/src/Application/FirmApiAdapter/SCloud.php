@@ -249,7 +249,7 @@ class SCloud extends FirmAbstract
             'price'      => '',
         ];
         $datas[] = $overseasCloudServerFeeTemp;
-        //cdn带宽费用明细，史文俊
+        //cdn带宽费用明细，史文俊 win调试屏蔽
         $cdnReport = $this->cdnReport($cdate, $products, $public_group);
 
         //星云带宽，暂时移到单独模块去统计了
@@ -267,8 +267,10 @@ class SCloud extends FirmAbstract
 
        //私有云综合服务成本，同星云费用
         $vmzhfwcbReport = $this->vmzhfwcbReport($cdate, $products, $public_group);
- 		
+
         $datas = array_merge($datas, $cdnReport, $scloudNetReport, $vmzhfwcbReport, $jgReport, $zhfwcbReport);
+        //调试
+//        $datas = array_merge($datas, $scloudNetReport, $vmzhfwcbReport, $jgReport, $zhfwcbReport);
 
         //计算总价
         $sum = [
