@@ -40,6 +40,12 @@ class FinancialProductGroupPricesForm extends Form
 
         $this->add(
             array(
+                'name' => 'vmzhfwcb',
+            )
+        );
+
+        $this->add(
+            array(
                 'name' => 'syshbgp',
             )
         );
@@ -150,7 +156,7 @@ class FinancialProductGroupPricesForm extends Form
                         array('name' => 'StringTrim'),
                     ),
                     'validators' => array(
-                        ['name' => 'NotEmpty', 'options' => ['message' => '综合服务成本不能为空']],
+                        ['name' => 'NotEmpty', 'options' => ['message' => '物理机综合服务成本不能为空']],
                         [
                             'name'    => 'callback',
                             'options' => array(
@@ -160,7 +166,34 @@ class FinancialProductGroupPricesForm extends Form
                                         }
                                         return true;
                                     },
-                                'message'  => '综合服务成本必须为大于0数字'
+                                'message'  => '物理机综合服务成本必须为大于0数字'
+                            ),
+                        ],
+                    ),
+                )
+            )
+        );
+
+        $inputFilter->add(
+            $factory->createInput(
+                array(
+                    'name'       => 'vmzhfwcb',
+                    'required'   => true,
+                    'filters'    => array(
+                        array('name' => 'StringTrim'),
+                    ),
+                    'validators' => array(
+                        ['name' => 'NotEmpty', 'options' => ['message' => '私有云综合服务成本不能为空']],
+                        [
+                            'name'    => 'callback',
+                            'options' => array(
+                                'callback' => function ($value) {
+                                        if (!is_numeric($value) && $value < 0) {
+                                            return false;
+                                        }
+                                        return true;
+                                    },
+                                'message'  => '私有云综合服务成本必须为大于0数字'
                             ),
                         ],
                     ),
